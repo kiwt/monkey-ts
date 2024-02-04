@@ -16,7 +16,7 @@ export class Lexer {
 
   readChar(): void {
     if (this.readPosition >= this.input.length) {
-      this.ch = "EOF"; // eof
+      this.ch = "EOF";
     } else {
       this.ch = this.input[this.readPosition];
     }
@@ -32,7 +32,40 @@ export class Lexer {
 
     switch (this.ch) {
       case "=":
+        if (this.peekChar() == "=") {
+          let ch = this.ch;
+          this.readChar();
+          tok = newToken(TokenKind.Eq, ch + this.ch);
+          break;
+        }
         tok = newToken(TokenKind.Assign, this.ch);
+        break;
+      case "+":
+        tok = newToken(TokenKind.Plus, this.ch);
+        break;
+      case "-":
+        tok = newToken(TokenKind.Minus, this.ch);
+        break;
+      case "!":
+        if (this.peekChar() == "=") {
+          let ch = this.ch;
+          this.readChar();
+          tok = newToken(TokenKind.NotEq, ch + this.ch);
+          break;
+        }
+        tok = newToken(TokenKind.Bang, this.ch);
+        break;
+      case "/":
+        tok = newToken(TokenKind.Slash, this.ch);
+        break;
+      case "*":
+        tok = newToken(TokenKind.Asterisk, this.ch);
+        break;
+      case "<":
+        tok = newToken(TokenKind.Lt, this.ch);
+        break;
+      case ">":
+        tok = newToken(TokenKind.Gt, this.ch);
         break;
       case ";":
         tok = newToken(TokenKind.Semicolon, this.ch);
@@ -45,9 +78,6 @@ export class Lexer {
         break;
       case ",":
         tok = newToken(TokenKind.Comma, this.ch);
-        break;
-      case "+":
-        tok = newToken(TokenKind.Plus, this.ch);
         break;
       case "{":
         tok = newToken(TokenKind.LBrace, this.ch);
@@ -103,6 +133,14 @@ export class Lexer {
     ) {
       this.readChar();
     }
+  }
+
+  peekChar(): string {
+    if (this.readPosition >= this.input.length) {
+      return "EOF";
+    }
+
+    return this.input[this.readPosition];
   }
 }
 

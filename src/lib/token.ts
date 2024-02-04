@@ -17,8 +17,17 @@ export const TokenKind = {
   Int: "int",
 
   // Operators
-  Assign: "assign",
-  Plus: "plus",
+  Assign: "=",
+  Plus: "+",
+  Minus: "-",
+  Bang: "!",
+  Asterisk: "*",
+  Slash: "/",
+
+  Lt: "<",
+  Gt: ">",
+  Eq: "==",
+  NotEq: "!=",
 
   // Delimiters
   Comma: ",",
@@ -32,11 +41,21 @@ export const TokenKind = {
   // Keywords
   Function: "function",
   Let: "let",
+  True: "true",
+  False: "false",
+  If: "if",
+  Else: "else",
+  Return: "return",
 } as const;
 
 const keywords = new Map<string, TokenType>([
   ["fn", TokenKind.Function],
   ["let", TokenKind.Let],
+  ["true", TokenKind.True],
+  ["false", TokenKind.False],
+  ["if", TokenKind.If],
+  ["else", TokenKind.Else],
+  ["return", TokenKind.Return],
 ]);
 
 export function lookupIdent(ident: string): TokenType {
