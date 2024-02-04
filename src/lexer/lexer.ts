@@ -1,4 +1,4 @@
-import { Token, TokenType, TokenKind, lookupIdent } from "./token";
+import { Token, TokenType, TokenKind, lookupIdent } from "../token/token";
 
 export class Lexer {
   private input: string;
