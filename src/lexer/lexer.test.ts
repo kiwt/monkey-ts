@@ -99,7 +99,7 @@ let ten = 10;
   let l = new Lexer(input);
 
   for (let tok of expected) {
-    let a = l.nextToken();
+    let a = l["nextToken"]();
     expect(a).toStrictEqual(tok);
   }
 });
