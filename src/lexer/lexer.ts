@@ -25,7 +25,7 @@ export class Lexer {
     this.readPosition += 1;
   }
 
-  private nextToken(): Token {
+  nextToken(): Token {
     let tok: Token;
 
     this.skipWhiteSpace();
