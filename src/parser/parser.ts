@@ -4,13 +4,24 @@ import { Token, TokenKind, TokenType } from "../token/token";
 
 export class Parser {
   l: Lexer;
+  errs: string[];
   curToken: Token;
   peekToken: Token;
 
   constructor(l: Lexer) {
     this.l = l;
+    this.errs = [];
     this.curToken = l.nextToken();
     this.peekToken = l.nextToken();
+  }
+
+  errors(): string[] {
+    return this.errs;
+  }
+
+  private peekError(t: TokenType): void {
+    const msg = `expected next token to be ${t}, got ${this.peekToken.Type} instead`;
+    this.errs.push(msg);
   }
 
   private nextToken(): void {
@@ -75,6 +86,7 @@ export class Parser {
       this.nextToken();
       return true;
     }
+    this.peekError(t);
     return false;
   }
 }

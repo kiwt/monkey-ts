@@ -38,6 +38,16 @@ export class LetStatement implements Statement {
   }
 }
 
+export class ReturnStatement implements Statement {
+  constructor(public token: Token, public returnValue: Expression) {}
+
+  statementNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+}
+
 export class Identifier implements Expression {
   constructor(public token: Token, public value: string) {}
 
