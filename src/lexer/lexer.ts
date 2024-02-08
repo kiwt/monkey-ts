@@ -14,7 +14,7 @@ export class Lexer {
     this.readChar();
   }
 
-  readChar(): void {
+  private readChar(): void {
     if (this.readPosition >= this.input.length) {
       this.ch = "EOF";
     } else {
@@ -25,7 +25,7 @@ export class Lexer {
     this.readPosition += 1;
   }
 
-  nextToken(): Token {
+  private nextToken(): Token {
     let tok: Token;
 
     this.skipWhiteSpace();
@@ -106,7 +106,7 @@ export class Lexer {
     return tok;
   }
 
-  readIdentifier(): string {
+  private readIdentifier(): string {
     let position = this.position;
     while (isLetter(this.ch)) {
       this.readChar();
@@ -115,7 +115,7 @@ export class Lexer {
     return this.input.substring(position, this.position);
   }
 
-  readNumber(): string {
+  private readNumber(): string {
     let position = this.position;
     while (isDigit(this.ch)) {
       this.readChar();
@@ -124,7 +124,7 @@ export class Lexer {
     return this.input.substring(position, this.position);
   }
 
-  skipWhiteSpace() {
+  private skipWhiteSpace() {
     while (
       this.ch === " " ||
       this.ch === "\t" ||
@@ -135,7 +135,7 @@ export class Lexer {
     }
   }
 
-  peekChar(): string {
+  private peekChar(): string {
     if (this.readPosition >= this.input.length) {
       return "EOF";
     }
