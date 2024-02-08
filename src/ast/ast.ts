@@ -39,7 +39,7 @@ export class LetStatement implements Statement {
 }
 
 export class ReturnStatement implements Statement {
-  constructor(public token: Token, public returnValue: Expression) {}
+  constructor(public token: Token, public returnValue?: Expression) {}
 
   statementNode(): void {}
 

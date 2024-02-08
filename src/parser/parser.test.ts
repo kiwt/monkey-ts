@@ -1,4 +1,4 @@
-import { LetStatement, Program, Statement } from "../ast/ast";
+import { LetStatement, Program, ReturnStatement, Statement } from "../ast/ast";
 import { Lexer } from "../lexer/lexer";
 import { TokenKind } from "../token/token";
 import { Parser } from "./parser";
@@ -18,15 +18,13 @@ test("testLetStatement", () => {
   const program = p.parseProgram();
   checkParserErrors(p);
 
-  if (program !== undefined) {
-    for (let index in expected) {
-      const stmt = program?.statements[index];
-      expect(testLetStatement(stmt, expected[index])).toBeTruthy();
-    }
+  for (let index in expected) {
+    const stmt = program?.statements[index];
+    expect(testLetStatement(stmt, expected[index])).toBeFalsy();
   }
 });
 
-function testLetStatement(s: Statement, name: string): boolean {
+function testLetStatement(s: Statement | undefined, name: string): boolean {
   if (s === undefined) {
     return false;
   }
@@ -45,6 +43,47 @@ function testLetStatement(s: Statement, name: string): boolean {
   }
 
   if (letStmt.name?.tokenLiteral() !== name) {
+    return false;
+  }
+
+  return true;
+}
+
+test("testReturnStatement", () => {
+  const input = `
+    return 5;
+    return 10;
+    return 993322;
+   `;
+
+  const l = new Lexer(input);
+  const p = new Parser(l);
+
+  const program = p.parseProgram();
+  checkParserErrors(p);
+
+  expect(program?.statements).toHaveLength(3);
+
+  for (const stmt of program ? program.statements : []) {
+    expect(testReturnStatement(stmt, "return")).toBeTruthy();
+  }
+});
+
+function testReturnStatement(s: Statement | undefined, name: string): boolean {
+  if (s === undefined) {
+    return false;
+  }
+
+  if (s.tokenLiteral() !== TokenKind.Return) {
+    return false;
+  }
+
+  let returnStmt = s as ReturnStatement;
+  if (returnStmt === undefined) {
+    return false;
+  }
+
+  if (returnStmt.tokenLiteral() !== name) {
     return false;
   }
 
