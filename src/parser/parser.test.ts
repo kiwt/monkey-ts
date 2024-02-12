@@ -311,9 +311,9 @@ function testParsingInfixExpressions(
 
 test("testOperatorPrecedenceParsing", () => {
   const tests = [
-    // { input: "-a * b", expected: "((-a) * b)" },
-    // { input: "!-a", expected: "(!(-a))" },
-    // { input: "a + b + c", expected: "((a + b) + c)" },
+    { input: "-a * b", expected: "((-a) * b)" },
+    { input: "!-a", expected: "(!(-a))" },
+    { input: "a + b + c", expected: "((a + b) + c)" },
     { input: "a + b - c", expected: "((a + b) - c)" },
     { input: "a * b * c", expected: "((a * b) * c)" },
     { input: "a * b / c", expected: "((a * b) / c)" },
