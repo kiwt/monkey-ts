@@ -105,6 +105,26 @@ export class ExpressionStatement implements Statement {
   }
 }
 
+export class BlockStatement implements Statement {
+  constructor(public token: Token, public statements: Statement[]) {}
+
+  statementNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    for (const s of this.statements) {
+      out += s.string();
+    }
+
+    return out;
+  }
+}
+
 export class Identifier implements Expression {
   constructor(public token: Token, public value: string) {}
 
@@ -179,6 +199,111 @@ export class InfixExpression implements Expression {
     out += this.left?.string();
     out += this.operator;
     out += this.right?.string();
+    out += ")";
+
+    return out;
+  }
+}
+
+export class IfExpression implements Expression {
+  constructor(
+    public token: Token, // The 'if' token
+    public condition?: Expression,
+    public consequence?: BlockStatement,
+    public alternative?: BlockStatement
+  ) {}
+
+  expressionNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    out += "if";
+    out += this.condition?.string();
+    out += " ";
+    out += this.consequence?.string();
+
+    if (this.alternative !== undefined) {
+      out += "else ";
+      out += this.alternative?.string();
+    }
+
+    return out;
+  }
+}
+
+export class Boolean implements Expression {
+  constructor(public token: Token, public value: boolean) {}
+
+  expressionNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    return this.token.Literal;
+  }
+}
+
+export class FunctionLiteral implements Expression {
+  constructor(
+    public token: Token,
+    public parameters: Identifier[],
+    public body?: BlockStatement
+  ) {}
+
+  expressionNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    let params: string[] = [];
+    for (const p of this.parameters) {
+      params.push(p.string());
+    }
+
+    out += this.tokenLiteral();
+    out += "(";
+    out += params.join(", ");
+    out += ")";
+    out += this.body?.string();
+
+    return out;
+  }
+}
+
+export class CallExpression implements Expression {
+  constructor(
+    public token: Token,
+    public args: Expression[],
+    public func?: Expression
+  ) {}
+
+  expressionNode(): void {}
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    let argStrings: string[] = [];
+    for (const p of this.args) {
+      argStrings.push(p.string());
+    }
+
+    out += this.func?.string();
+    out += "(";
+    out += argStrings.join(", ");
     out += ")";
 
     return out;
