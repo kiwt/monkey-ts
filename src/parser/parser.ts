@@ -21,13 +21,13 @@ import { Token, TokenKind, TokenType } from "../token/token";
 type PrecedenceType = (typeof Precedence)[keyof typeof Precedence];
 
 const Precedence = {
-  Lowest: 0,
-  Equals: 1, // ==
-  LessGreater: 2, // > or <
-  Sum: 3, // +
-  Product: 4, // *
-  Prefix: 5, // -X or !X
-  Call: 6, // myFunction(X)
+  Lowest: 1,
+  Equals: 2, // ==
+  LessGreater: 3, // > or <
+  Sum: 4, // +
+  Product: 5, // *
+  Prefix: 6, // -X or !X
+  Call: 7, // myFunction(X)
 } as const;
 
 const precedences = new Map<TokenType, PrecedenceType>([
@@ -130,13 +130,13 @@ export class Parser {
     const stmt = new LetStatement(this.curToken);
 
     if (!this.expectPeek(TokenKind.Ident)) {
-      return;
+      return undefined;
     }
 
     stmt.name = new Identifier(this.curToken, this.curToken.Literal);
 
     if (!this.expectPeek(TokenKind.Assign)) {
-      return;
+      return undefined;
     }
 
     this.nextToken();
@@ -188,7 +188,7 @@ export class Parser {
       !this.peekTokenIs(TokenKind.Semicolon) &&
       precedence < this.peekPrecedence()
     ) {
-      let infix = this.infixParseFns.get(this.peekToken.Type);
+      const infix = this.infixParseFns.get(this.peekToken.Type);
       if (infix === undefined) {
         return leftExp;
       }
@@ -431,7 +431,7 @@ export class Parser {
   }
 
   private curPrecedence(): PrecedenceType {
-    const p = precedences.get(this.peekToken.Type);
+    const p = precedences.get(this.curToken.Type);
     if (p !== undefined) {
       return p;
     }

@@ -279,7 +279,7 @@ test("testOperatorPrecedenceParsing", () => {
     },
     {
       input: "3 < 5 == true",
-      expected: "((3 > 5) == true",
+      expected: "((3 < 5) == true)",
     },
     {
       input: "1 + (2 + 3) + 4",
@@ -318,7 +318,7 @@ test("testOperatorPrecedenceParsing", () => {
     const program = p.parseProgram();
     checkParserErrors(p);
 
-    expect((program?.string(), tests[index].expected)).toBeTruthy();
+    expect(program?.string()).toStrictEqual(tests[index].expected);
   }
 });
 
