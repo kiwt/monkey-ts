@@ -143,7 +143,7 @@ export class Parser {
 
     stmt.value = this.parseExpression(Precedence.Lowest);
 
-    while (!this.curTokenIs(TokenKind.Semicolon)) {
+    if (this.peekTokenIs(TokenKind.Semicolon)) {
       this.nextToken();
     }
 
@@ -157,7 +157,7 @@ export class Parser {
 
     stmt.returnValue = this.parseExpression(Precedence.Lowest);
 
-    if (!this.curTokenIs(TokenKind.Semicolon)) {
+    if (this.peekTokenIs(TokenKind.Semicolon)) {
       this.nextToken();
     }
 

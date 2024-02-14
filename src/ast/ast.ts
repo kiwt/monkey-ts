@@ -170,7 +170,7 @@ export class PrefixExpression implements Expression {
     let out = "";
 
     out += "(";
-    out += " " + this.operator + " ";
+    out += this.operator;
     out += this.right?.string();
     out += ")";
 
@@ -197,7 +197,7 @@ export class InfixExpression implements Expression {
 
     out += "(";
     out += this.left?.string();
-    out += this.operator;
+    out += " " + this.operator + " ";
     out += this.right?.string();
     out += ")";
 
