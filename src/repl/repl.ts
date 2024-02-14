@@ -1,6 +1,20 @@
 import * as readline from "readline";
 import { Lexer } from "../lexer/lexer";
 import { Token, TokenKind } from "../token/token";
+import { Parser } from "../parser/parser";
+
+const monkeyFace = `            __,__
+   .--.  .-"     "-.  .--.
+  / .. \/  .-. .-.  \/ .. \
+ | |  '|  /   Y   \  |'  | |
+ | \   \  \ 0 | 0 /  /   / |
+  \ '- ,\.-"""""""-./, -' /
+   ''-' /_   ^ ^   _\ '-''
+       |  \._   _./  |
+       \   \ '~' /   /
+        '._ '-=-' _.'
+           '-----'
+`;
 
 export function start(): void {
   const rl = readline.createInterface({
@@ -13,13 +27,26 @@ export function start(): void {
 
   rl.on("line", (input: string) => {
     const lexer = new Lexer(input);
-    let tok = lexer.nextToken();
-
-    while (tok.Type != TokenKind.Eof) {
-      console.log(tok);
-      tok = lexer.nextToken();
+    const parser = new Parser(lexer);
+    const program = parser.parseProgram();
+    if (parser.errs.length != 0) {
+      printParseErrors(process.stdout, parser.errs);
+    } else {
+      process.stdout.write(program?.string() + "\n");
     }
-  }).on("close", () => {
+
+    rl.prompt();
+  });
+
+  rl.on("close", () => {
     process.exit(0);
+  });
+}
+
+function printParseErrors(out: NodeJS.WriteStream, errs: string[]): void {
+  out.write(monkeyFace);
+  out.write("Woops! We ran into some monkey business here!\n");
+  errs.forEach((msg) => {
+    out.write("\t" + msg + "\n");
   });
 }
