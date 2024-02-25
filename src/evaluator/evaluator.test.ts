@@ -1,7 +1,7 @@
 import { Lexer } from "../lexer/lexer";
 import { BooleanObj, IntegerObj, Obj } from "../object/object";
 import { Parser } from "../parser/parser";
-import { evaluate } from "./evaluator";
+import { NULL, evaluate } from "./evaluator";
 
 function testEval(input: string): Obj {
   const l = new Lexer(input);
@@ -93,6 +93,28 @@ test("testBangOperator", () => {
   }
 });
 
+test("testIfExpressions", () => {
+  const tests: { input: string; expected: any }[] = [
+    { input: "if (true) { 10 }", expected: 10 },
+    { input: "if (false) { 10 }", expected: null },
+    { input: "if (1) { 10 }", expected: 10 },
+    { input: "if (1 < 2) { 10 }", expected: 10 },
+    { input: "if (1 > 2) { 10 }", expected: null },
+    { input: "if (1 > 2) { 10 } else { 20 }", expected: 20 },
+    { input: "if (1 < 2) { 10 } else { 20 }", expected: 10 },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+    const integer = tt.expected as number;
+    if (integer) {
+      expect(testIntegerObj(evaluated, integer)).toBe(true);
+    } else {
+      expect(testNullObj(evaluated)).toBe(true);
+    }
+  }
+});
+
 function testIntegerObj(obj: Obj, expected: number): boolean {
   const result = obj as IntegerObj;
   if (result === undefined) {
@@ -105,6 +127,14 @@ function testIntegerObj(obj: Obj, expected: number): boolean {
     return false;
   }
 
+  return true;
+}
+
+function testNullObj(obj: Obj): boolean {
+  if (obj != NULL) {
+    console.error(`Obj is not NULL. got=${obj}`);
+    return false;
+  }
   return true;
 }
 

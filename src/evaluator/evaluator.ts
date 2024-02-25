@@ -1,4 +1,4 @@
-import { ObjectType } from "typescript";
+import { ConditionalExpression, ObjectType } from "typescript";
 import {
   Node,
   Program,
@@ -9,6 +9,7 @@ import {
   Boolean,
   PrefixExpression,
   InfixExpression,
+  IfExpression,
 } from "../ast/ast";
 import {
   BooleanObj,
@@ -34,6 +35,12 @@ export function evaluate(node?: Node): Obj | undefined {
 
     case NodeKind.ExpressionStatement:
       return evaluate((node as ExpressionStatement).expression!);
+
+    case NodeKind.BlockStatement:
+      return evalStatements((node as Program).statements);
+
+    case NodeKind.IfExpression:
+      return evalIfExpression(node as IfExpression);
 
     // Expressions
     case NodeKind.IntegerLiteral:
@@ -157,5 +164,29 @@ function evalIntegerInfixExpression(
       return nativeBoolToBooleanObject(leftVal !== rightVal);
     default:
       return NULL;
+  }
+}
+
+function evalIfExpression(ie: IfExpression): Obj {
+  const condition = evaluate(ie.condition)!;
+  if (isTruthy(condition)) {
+    return evaluate(ie.consequence)!;
+  } else if (ie.alternative !== undefined) {
+    return evaluate(ie.alternative)!;
+  } else {
+    return NULL;
+  }
+}
+
+function isTruthy(obj: Obj): boolean {
+  switch (obj) {
+    case NULL:
+      return false;
+    case TRUE:
+      return true;
+    case FALSE:
+      return false;
+    default:
+      return true;
   }
 }
