@@ -1,9 +1,27 @@
-import { Token, TokenKind } from "../token/token";
-import { Lexer } from "../lexer/lexer";
+import { Token } from "../token/token";
+
+export type NodeType = (typeof NodeKind)[keyof typeof NodeKind];
+
+export const NodeKind = {
+  Program: 1,
+  LetStatement: 2,
+  ReturnStatement: 3,
+  ExpressionStatement: 4,
+  BlockStatement: 5,
+  Identifier: 6,
+  IntegerLiteral: 7,
+  PrefixExpression: 8,
+  InfixExpression: 9,
+  IfExpression: 10,
+  Boolean: 11,
+  FunctionLiteral: 12,
+  CallExpression: 13,
+} as const;
 
 export interface Node {
   tokenLiteral(): string;
   string(): string;
+  kind(): NodeType;
 }
 
 export interface Statement extends Node {
@@ -32,6 +50,10 @@ export class Program implements Node {
     }
 
     return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.Program;
   }
 }
 
@@ -62,6 +84,10 @@ export class LetStatement implements Statement {
 
     return out;
   }
+
+  kind(): NodeType {
+    return NodeKind.LetStatement;
+  }
 }
 
 export class ReturnStatement implements Statement {
@@ -85,6 +111,10 @@ export class ReturnStatement implements Statement {
 
     return out;
   }
+
+  kind(): NodeType {
+    return NodeKind.ReturnStatement;
+  }
 }
 
 export class ExpressionStatement implements Statement {
@@ -102,6 +132,10 @@ export class ExpressionStatement implements Statement {
     }
 
     return "";
+  }
+
+  kind(): NodeType {
+    return NodeKind.ExpressionStatement;
   }
 }
 
@@ -123,6 +157,10 @@ export class BlockStatement implements Statement {
 
     return out;
   }
+
+  kind(): NodeType {
+    return NodeKind.BlockStatement;
+  }
 }
 
 export class Identifier implements Expression {
@@ -137,6 +175,10 @@ export class Identifier implements Expression {
   string(): string {
     return this.value;
   }
+
+  kind(): NodeType {
+    return NodeKind.Identifier;
+  }
 }
 
 export class IntegerLiteral implements Expression {
@@ -150,6 +192,10 @@ export class IntegerLiteral implements Expression {
 
   string(): string {
     return this.token.Literal;
+  }
+
+  kind(): NodeType {
+    return NodeKind.IntegerLiteral;
   }
 }
 
@@ -175,6 +221,10 @@ export class PrefixExpression implements Expression {
     out += ")";
 
     return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.PrefixExpression;
   }
 }
 
@@ -202,6 +252,10 @@ export class InfixExpression implements Expression {
     out += ")";
 
     return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.InfixExpression;
   }
 }
 
@@ -234,6 +288,10 @@ export class IfExpression implements Expression {
 
     return out;
   }
+
+  kind(): NodeType {
+    return NodeKind.IfExpression;
+  }
 }
 
 export class Boolean implements Expression {
@@ -247,6 +305,10 @@ export class Boolean implements Expression {
 
   string(): string {
     return this.token.Literal;
+  }
+
+  kind(): NodeType {
+    return NodeKind.Boolean;
   }
 }
 
@@ -279,6 +341,10 @@ export class FunctionLiteral implements Expression {
 
     return out;
   }
+
+  kind(): NodeType {
+    return NodeKind.FunctionLiteral;
+  }
 }
 
 export class CallExpression implements Expression {
@@ -307,5 +373,9 @@ export class CallExpression implements Expression {
     out += ")";
 
     return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.CallExpression;
   }
 }

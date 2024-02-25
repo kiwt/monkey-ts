@@ -2,6 +2,7 @@ import * as readline from "readline";
 import { Lexer } from "../lexer/lexer";
 import { Token, TokenKind } from "../token/token";
 import { Parser } from "../parser/parser";
+import { evaluate } from "../evaluator/evaluator";
 
 const monkeyFace = `            __,__
    .--.  .-"     "-.  .--.
@@ -22,7 +23,7 @@ export function start(): void {
     output: process.stdout,
   });
 
-  rl.setPrompt(">>");
+  rl.setPrompt(">> ");
   rl.prompt();
 
   rl.on("line", (input: string) => {
@@ -31,8 +32,13 @@ export function start(): void {
     const program = parser.parseProgram();
     if (parser.errs.length != 0) {
       printParseErrors(process.stdout, parser.errs);
-    } else {
-      process.stdout.write(program?.string() + "\n");
+      // } else {
+      // process.stdout.write(program?.string() + "\n");
+    }
+
+    const evaluated = evaluate(program!);
+    if (evaluated !== undefined) {
+      process.stdout.write(evaluated.inspect() + "\n");
     }
 
     rl.prompt();
