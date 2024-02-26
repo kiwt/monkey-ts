@@ -107,11 +107,34 @@ test("testIfExpressions", () => {
   for (const tt of tests) {
     const evaluated = testEval(tt.input);
     const integer = tt.expected as number;
-    if (integer) {
+    if (typeof integer === "number") {
       expect(testIntegerObj(evaluated, integer)).toBe(true);
     } else {
       expect(testNullObj(evaluated)).toBe(true);
     }
+  }
+});
+
+test("testReturnStatements", () => {
+  const tests: { input: string; expected: number }[] = [
+    { input: "return 10;", expected: 10 },
+    { input: "return 10; 9;", expected: 10 },
+    { input: "return 2 * 5; 9;", expected: 10 },
+    { input: "9; return 2 * 5; 9;", expected: 10 },
+    {
+      input: `if (10 > 1) {
+                if (10 > 1) {
+                  return 10;
+                }
+                return 1;
+              }`,
+      expected: 10,
+    },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+    expect(testIntegerObj(evaluated, tt.expected)).toBe(true);
   }
 });
 

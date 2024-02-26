@@ -4,6 +4,7 @@ export const ObjType = {
   INTEGER_OBJ: "integer",
   BOOLEAN_OBJ: "boolean",
   NULL_OBJ: "null",
+  RETURN_VALUE_OBJ: "returnValue",
 } as const;
 
 export interface Obj {
@@ -41,5 +42,16 @@ export class NullObj implements Obj {
   }
   inspect(): string {
     return "null";
+  }
+}
+
+export class ReturnValueObj implements Obj {
+  constructor(public value: Obj) {}
+
+  type(): ObjType {
+    return ObjType.RETURN_VALUE_OBJ;
+  }
+  inspect(): string {
+    return this.value.inspect();
   }
 }

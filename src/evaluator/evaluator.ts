@@ -10,6 +10,8 @@ import {
   PrefixExpression,
   InfixExpression,
   IfExpression,
+  ReturnStatement,
+  BlockStatement,
 } from "../ast/ast";
 import {
   BooleanObj,
@@ -17,6 +19,7 @@ import {
   NullObj,
   Obj,
   ObjType,
+  ReturnValueObj,
 } from "../object/object";
 
 export const NULL: NullObj = new NullObj();
@@ -31,16 +34,17 @@ export function evaluate(node?: Node): Obj | undefined {
   switch (node.kind()) {
     // Statements
     case NodeKind.Program:
-      return evalStatements((node as Program).statements);
+      return evalProgram((node as Program).statements);
 
     case NodeKind.ExpressionStatement:
       return evaluate((node as ExpressionStatement).expression!);
 
     case NodeKind.BlockStatement:
-      return evalStatements((node as Program).statements);
+      return evalBlockStatement(node as BlockStatement);
 
-    case NodeKind.IfExpression:
-      return evalIfExpression(node as IfExpression);
+    case NodeKind.ReturnStatement:
+      const val = evaluate((node as ReturnStatement).returnValue);
+      return new ReturnValueObj(val!);
 
     // Expressions
     case NodeKind.IntegerLiteral:
@@ -48,6 +52,9 @@ export function evaluate(node?: Node): Obj | undefined {
 
     case NodeKind.Boolean:
       return nativeBoolToBooleanObject((node as Boolean).value);
+
+    case NodeKind.IfExpression:
+      return evalIfExpression(node as IfExpression);
 
     case NodeKind.PrefixExpression:
       const prefixExp = node as PrefixExpression;
@@ -68,10 +75,28 @@ export function evaluate(node?: Node): Obj | undefined {
   return undefined;
 }
 
-function evalStatements(stmts: Statement[]): Obj {
+function evalProgram(stmts: Statement[]): Obj {
   let result: Obj | undefined = undefined;
   for (const statement of stmts) {
     result = evaluate(statement);
+
+    const returnValue = result as ReturnValueObj;
+    if (returnValue instanceof ReturnValueObj) {
+      return returnValue.value;
+    }
+  }
+
+  return result!;
+}
+
+function evalBlockStatement(block: BlockStatement): Obj {
+  let result: Obj | undefined = undefined;
+  for (const statement of block.statements) {
+    result = evaluate(statement);
+
+    if (result !== undefined && result.type() === ObjType.RETURN_VALUE_OBJ) {
+      return result;
+    }
   }
 
   return result!;
