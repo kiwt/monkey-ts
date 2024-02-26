@@ -1,3 +1,4 @@
+import { Environment } from "../environment/environment";
 import { Lexer } from "../lexer/lexer";
 import { BooleanObj, ErrorObj, IntegerObj, Obj } from "../object/object";
 import { Parser } from "../parser/parser";
@@ -7,9 +8,10 @@ function testEval(input: string): Obj {
   const l = new Lexer(input);
   const p = new Parser(l);
   const program = p.parseProgram();
+  const env = new Environment();
 
   expect(program).toBeDefined();
-  return evaluate(program!)!;
+  return evaluate(env, program)!;
 }
 
 test("testEvalIntegerExpression", () => {
@@ -138,6 +140,20 @@ test("testReturnStatements", () => {
   }
 });
 
+test("testLetStatement", () => {
+  const tests: { input: string; expected: number }[] = [
+    { input: "let a = 5; a;", expected: 5 },
+    { input: "let a = 5 * 5; a;", expected: 25 },
+    { input: "let a = 5; let b = a; b;", expected: 5 },
+    { input: "let a = 5; let b = a; let c = a + b + 5; c;", expected: 15 },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+    expect(testIntegerObj(evaluated, tt.expected));
+  }
+});
+
 test("testErrorHandling", () => {
   const tests: { input: string; expected: string }[] = [
     {
@@ -159,6 +175,10 @@ test("testErrorHandling", () => {
     {
       input: "if (10 > 1) { true + false; }",
       expected: "unknown operator: BOOLEAN + BOOLEAN",
+    },
+    {
+      input: "foobar",
+      expected: "identifier not found: foobar",
     },
   ];
 
@@ -209,7 +229,7 @@ function testBooleanObj(obj: Obj, expected: boolean): boolean {
 function testErrorObj(obj: Obj, expected: string): boolean {
   const result = obj as ErrorObj;
   if (!(result instanceof ErrorObj)) {
-    console.error(`no error object returned. got=${obj.type()}`);
+    console.error(`no error object returned. got=${obj}`);
     return false;
   }
 

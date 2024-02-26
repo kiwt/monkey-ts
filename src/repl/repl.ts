@@ -3,6 +3,7 @@ import { Lexer } from "../lexer/lexer";
 import { Token, TokenKind } from "../token/token";
 import { Parser } from "../parser/parser";
 import { evaluate } from "../evaluator/evaluator";
+import { Environment } from "../environment/environment";
 
 const monkeyFace = `            __,__
    .--.  .-"     "-.  .--.
@@ -36,7 +37,8 @@ export function start(): void {
       // process.stdout.write(program?.string() + "\n");
     }
 
-    const evaluated = evaluate(program!);
+    const env = new Environment();
+    const evaluated = evaluate(env, program);
     if (evaluated !== undefined) {
       process.stdout.write(evaluated.inspect() + "\n");
     }
