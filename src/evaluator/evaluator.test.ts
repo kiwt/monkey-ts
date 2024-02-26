@@ -1,5 +1,5 @@
 import { Lexer } from "../lexer/lexer";
-import { BooleanObj, IntegerObj, Obj } from "../object/object";
+import { BooleanObj, ErrorObj, IntegerObj, Obj } from "../object/object";
 import { Parser } from "../parser/parser";
 import { NULL, evaluate } from "./evaluator";
 
@@ -138,6 +138,36 @@ test("testReturnStatements", () => {
   }
 });
 
+test("testErrorHandling", () => {
+  const tests: { input: string; expected: string }[] = [
+    {
+      input: "5 + true;",
+      expected: "type mismatch: INTEGER + BOOLEAN",
+    },
+    {
+      input: "5 + true; 5;",
+      expected: "type mismatch: INTEGER + BOOLEAN",
+    },
+    {
+      input: "-true",
+      expected: "unknown operator: -BOOLEAN",
+    },
+    {
+      input: "true + false;",
+      expected: "unknown operator: BOOLEAN + BOOLEAN",
+    },
+    {
+      input: "if (10 > 1) { true + false; }",
+      expected: "unknown operator: BOOLEAN + BOOLEAN",
+    },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+    expect(testErrorObj(evaluated, tt.expected)).toBe(true);
+  }
+});
+
 function testIntegerObj(obj: Obj, expected: number): boolean {
   const result = obj as IntegerObj;
   if (result === undefined) {
@@ -170,6 +200,23 @@ function testBooleanObj(obj: Obj, expected: boolean): boolean {
 
   if (result.value !== expected) {
     console.error(`Obj has wrong value. got=${result.value}, want=${expected}`);
+    return false;
+  }
+
+  return true;
+}
+
+function testErrorObj(obj: Obj, expected: string): boolean {
+  const result = obj as ErrorObj;
+  if (!(result instanceof ErrorObj)) {
+    console.error(`no error object returned. got=${obj.type()}`);
+    return false;
+  }
+
+  if (result.message !== expected) {
+    console.error(
+      `wrong error message. expected=${expected}, got=${result.message}`
+    );
     return false;
   }
 

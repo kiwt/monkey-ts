@@ -15,6 +15,7 @@ import {
 } from "../ast/ast";
 import {
   BooleanObj,
+  ErrorObj,
   IntegerObj,
   NullObj,
   Obj,
@@ -44,6 +45,9 @@ export function evaluate(node?: Node): Obj | undefined {
 
     case NodeKind.ReturnStatement:
       const val = evaluate((node as ReturnStatement).returnValue);
+      if (isError(val)) {
+        return val;
+      }
       return new ReturnValueObj(val!);
 
     // Expressions
@@ -56,20 +60,30 @@ export function evaluate(node?: Node): Obj | undefined {
     case NodeKind.IfExpression:
       return evalIfExpression(node as IfExpression);
 
-    case NodeKind.PrefixExpression:
+    case NodeKind.PrefixExpression: {
       const prefixExp = node as PrefixExpression;
-      return evalPrefixExpression(
-        prefixExp.operator,
-        evaluate(prefixExp.right)!
-      );
+      const right = evaluate(prefixExp.right);
+      if (isError(right)) {
+        return right;
+      }
 
-    case NodeKind.InfixExpression:
+      return evalPrefixExpression(prefixExp.operator, right);
+    }
+
+    case NodeKind.InfixExpression: {
       const infixExp = node as InfixExpression;
-      return evalInfixExpression(
-        infixExp.operator,
-        evaluate(infixExp.left)!,
-        evaluate(infixExp.right)!
-      );
+      const left = evaluate(infixExp.left);
+      if (isError(left)) {
+        return left;
+      }
+
+      const right = evaluate(infixExp.right);
+      if (isError(right)) {
+        return right;
+      }
+
+      return evalInfixExpression(infixExp.operator, left, right);
+    }
   }
 
   return undefined;
@@ -80,10 +94,18 @@ function evalProgram(stmts: Statement[]): Obj {
   for (const statement of stmts) {
     result = evaluate(statement);
 
-    const returnValue = result as ReturnValueObj;
-    if (returnValue instanceof ReturnValueObj) {
-      return returnValue.value;
+    switch (result?.type()) {
+      case ObjType.RETURN_VALUE_OBJ:
+        const returnValue = result as ReturnValueObj;
+        return returnValue.value;
+
+      case ObjType.ERROR_OBJ:
+        return result;
     }
+
+    // if (returnValue instanceof ReturnValueObj) {
+    // return returnValue.value;
+    // }
   }
 
   return result!;
@@ -94,15 +116,26 @@ function evalBlockStatement(block: BlockStatement): Obj {
   for (const statement of block.statements) {
     result = evaluate(statement);
 
-    if (result !== undefined && result.type() === ObjType.RETURN_VALUE_OBJ) {
-      return result;
+    if (result !== undefined) {
+      const rt = result.type();
+      if (rt === ObjType.RETURN_VALUE_OBJ || rt === ObjType.ERROR_OBJ) {
+        return result;
+      }
     }
   }
 
   return result!;
 }
 
-function evalInfixExpression(operator: string, left: Obj, right: Obj): Obj {
+function evalInfixExpression(
+  operator: string,
+  left?: Obj,
+  right?: Obj
+): Obj | undefined {
+  if (!left || !right) {
+    return undefined;
+  }
+
   if (
     left.type() === ObjType.INTEGER_OBJ &&
     right.type() === ObjType.INTEGER_OBJ
@@ -118,7 +151,15 @@ function evalInfixExpression(operator: string, left: Obj, right: Obj): Obj {
     return nativeBoolToBooleanObject(left !== right);
   }
 
-  return NULL;
+  if (left.type() != right.type()) {
+    return newError(
+      `type mismatch: ${left.type()} ${operator} ${right.type()}`
+    );
+  }
+
+  return newError(
+    `unknown operator: ${left.type()} ${operator} ${right.type()}`
+  );
 }
 
 function nativeBoolToBooleanObject(input: boolean): BooleanObj {
@@ -128,15 +169,17 @@ function nativeBoolToBooleanObject(input: boolean): BooleanObj {
   return FALSE;
 }
 
-function evalPrefixExpression(operator: string, right: Obj): Obj {
+function evalPrefixExpression(operator: string, right?: Obj): Obj | undefined {
+  if (!right) {
+    return undefined;
+  }
   switch (operator) {
     case "!":
       return evalBangOperatorExpression(right);
-
     case "-":
       return evalMinusPrefixOperatorExpression(right);
     default:
-      return new NullObj();
+      return newError(`unknown operator: ${operator} ${right.type()}`);
   }
 }
 
@@ -155,7 +198,7 @@ function evalBangOperatorExpression(right: Obj): Obj {
 
 function evalMinusPrefixOperatorExpression(right: Obj): Obj {
   if (right.type() !== ObjType.INTEGER_OBJ) {
-    return NULL;
+    return newError(`unknown operator: -${right.type()}`);
   }
 
   const value = (right as IntegerObj).value;
@@ -188,12 +231,18 @@ function evalIntegerInfixExpression(
     case "!=":
       return nativeBoolToBooleanObject(leftVal !== rightVal);
     default:
-      return NULL;
+      return newError(
+        `unknown operator: ${left.type()} ${operator} ${right.type()}`
+      );
   }
 }
 
 function evalIfExpression(ie: IfExpression): Obj {
   const condition = evaluate(ie.condition)!;
+  if (isError(condition)) {
+    return condition;
+  }
+
   if (isTruthy(condition)) {
     return evaluate(ie.consequence)!;
   } else if (ie.alternative !== undefined) {
@@ -214,4 +263,16 @@ function isTruthy(obj: Obj): boolean {
     default:
       return true;
   }
+}
+
+function isError(obj: Obj | undefined): boolean {
+  if (obj !== undefined) {
+    return obj.type() === ObjType.ERROR_OBJ;
+  }
+  return false;
+}
+
+function newError(format: string, ...args: any[]): ErrorObj {
+  const message = `${format}${args.map((arg) => typeof arg).join(",")}`;
+  return new ErrorObj(message);
 }

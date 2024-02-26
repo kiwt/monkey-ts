@@ -1,10 +1,11 @@
 export type ObjType = (typeof ObjType)[keyof typeof ObjType];
 
 export const ObjType = {
-  INTEGER_OBJ: "integer",
-  BOOLEAN_OBJ: "boolean",
-  NULL_OBJ: "null",
-  RETURN_VALUE_OBJ: "returnValue",
+  INTEGER_OBJ: "INTEGER",
+  BOOLEAN_OBJ: "BOOLEAN",
+  NULL_OBJ: "NULL",
+  RETURN_VALUE_OBJ: "RETURN_VALUE",
+  ERROR_OBJ: "ERROR",
 } as const;
 
 export interface Obj {
@@ -53,5 +54,16 @@ export class ReturnValueObj implements Obj {
   }
   inspect(): string {
     return this.value.inspect();
+  }
+}
+
+export class ErrorObj implements Obj {
+  constructor(public message: string) {}
+
+  type(): ObjType {
+    return ObjType.ERROR_OBJ;
+  }
+  inspect(): string {
+    return "ERROR: " + this.message;
   }
 }
