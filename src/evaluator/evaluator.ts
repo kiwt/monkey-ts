@@ -1,4 +1,3 @@
-import { ConditionalExpression, ObjectType } from "typescript";
 import {
   Node,
   Program,
@@ -14,10 +13,14 @@ import {
   BlockStatement,
   LetStatement,
   Identifier,
+  FunctionLiteral,
+  CallExpression,
+  Expression,
 } from "../ast/ast";
 import {
   BooleanObj,
   ErrorObj,
+  FunctionObj,
   IntegerObj,
   NullObj,
   Obj,
@@ -61,21 +64,34 @@ export function evaluate(env: Environment, node?: Node): Obj | undefined {
     }
 
     // Expressions
-    case NodeKind.Identifier: {
-      const identifier = node as Identifier;
-      const [val, ok] = env.get(identifier.value);
-      if (!ok) {
-        return newError(`identifier not found: ${identifier.value}`);
-      }
-
-      return val;
-    }
+    case NodeKind.Identifier:
+      return evalIdentifier(env, node as Identifier);
 
     case NodeKind.IntegerLiteral:
       return new IntegerObj((node as IntegerLiteral).value);
 
+    case NodeKind.FunctionLiteral: {
+      const fn = node as FunctionLiteral;
+      const params = fn.parameters;
+      const body = fn.body;
+      return new FunctionObj(env, params, body);
+    }
+
     case NodeKind.Boolean:
       return nativeBoolToBooleanObject((node as Boolean).value);
+
+    case NodeKind.CallExpression: {
+      const fn = evaluate(env, (node as CallExpression).func);
+      if (isError(fn)) {
+        return fn;
+      }
+      const args = evalExpressions(env, (node as CallExpression).args);
+      if (args.length === 1 && isError(args[0])) {
+        return args[0];
+      }
+
+      return applyFunction(args, fn);
+    }
 
     case NodeKind.IfExpression:
       return evalIfExpression(env, node as IfExpression);
@@ -266,6 +282,68 @@ function evalIfExpression(env: Environment, ie: IfExpression): Obj {
   } else {
     return NULL;
   }
+}
+
+function evalExpressions(env: Environment, exps: Expression[]): Obj[] {
+  const result: Obj[] = [];
+
+  for (const e of exps) {
+    const evaluated = evaluate(env, e);
+    if (!evaluated) {
+      return [];
+    }
+
+    if (isError(evaluated)) {
+      return [evaluated];
+    }
+    result.push(evaluated);
+  }
+
+  return result;
+}
+
+function evalIdentifier(env: Environment, node: Identifier): Obj | undefined {
+  const [val, ok] = env.get(node.value);
+  if (!ok) {
+    return newError(`identifier not found: ${node.value}`);
+  }
+
+  return val;
+}
+
+function applyFunction(args: Obj[], fn?: Obj): Obj | undefined {
+  if (!fn) {
+    return undefined;
+  }
+
+  const func = fn as FunctionObj;
+  if (!(func instanceof FunctionObj)) {
+    return newError(`not a function: ${fn?.type()}`);
+  }
+
+  const extendedEnv = extendFunctionEnv(args, func);
+  const evaluated = evaluate(extendedEnv, func.body);
+  return unwrapReturnValue(evaluated!);
+}
+
+function extendFunctionEnv(args: Obj[], fn: FunctionObj): Environment {
+  const env = new Environment(fn?.env);
+
+  for (let paramIdx = 0; paramIdx < fn.parameters.length; paramIdx++) {
+    const param = fn.parameters[paramIdx];
+    env.set(param.value, args[paramIdx]);
+  }
+
+  return env;
+}
+
+function unwrapReturnValue(obj: Obj): Obj | undefined {
+  const returnValue = obj as ReturnValueObj;
+  if (returnValue instanceof ReturnValueObj) {
+    return returnValue.value;
+  }
+
+  return obj;
 }
 
 function isTruthy(obj: Obj): boolean {

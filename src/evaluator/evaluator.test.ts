@@ -1,6 +1,12 @@
 import { Environment } from "../object/environment";
 import { Lexer } from "../lexer/lexer";
-import { BooleanObj, ErrorObj, IntegerObj, Obj } from "../object/object";
+import {
+  BooleanObj,
+  ErrorObj,
+  FunctionObj,
+  IntegerObj,
+  Obj,
+} from "../object/object";
 import { Parser } from "../parser/parser";
 import { NULL, evaluate } from "./evaluator";
 
@@ -154,6 +160,43 @@ test("testLetStatement", () => {
   }
 });
 
+test("testFunctionObject", () => {
+  const input = "fn(x) { x + 2; };";
+
+  const evaluated = testEval(input);
+  expect(testFunctionObj(evaluated, "(x + 2)")).toBe(true);
+});
+
+test("testFunctionApplication", () => {
+  const tests: { input: string; expected: number }[] = [
+    { input: "let identity = fn(x) { x; }; identity(5);", expected: 5 },
+    { input: "let identity = fn(x) { return x; }; identity(5);", expected: 5 },
+    { input: "let double = fn(x) { x * 2; }; double(5);", expected: 10 },
+    { input: "let add = fn(x, y) { x + y; }; add(5, 5);", expected: 10 },
+    {
+      input: "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));",
+      expected: 20,
+    },
+    { input: "fn(x) { x; }(5)", expected: 5 },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+    expect(testIntegerObj(evaluated, tt.expected)).toBe(true);
+  }
+});
+
+test("testClosures", () => {
+  const input = `let newAdder = fn(x) {
+     fn(y) { x + y };
+};
+   let addTwo = newAdder(2);
+   addTwo(2);`;
+
+  const evaluated = testEval(input);
+  expect(testIntegerObj(evaluated, 4)).toBe(true);
+});
+
 test("testErrorHandling", () => {
   const tests: { input: string; expected: string }[] = [
     {
@@ -221,6 +264,25 @@ function testBooleanObj(obj: Obj, expected: boolean): boolean {
   if (result.value !== expected) {
     console.error(`Obj has wrong value. got=${result.value}, want=${expected}`);
     return false;
+  }
+
+  return true;
+}
+
+function testFunctionObj(obj: Obj, expected: string): boolean {
+  const fn = obj as FunctionObj;
+  if (!(fn instanceof FunctionObj)) {
+    console.error(`object is not Function. got=${obj.type()}`);
+    return false;
+  }
+
+  if (fn.parameters.length !== 1) {
+    console.error(`function has wrong parameters. Parameters=${fn.parameters}`);
+    return false;
+  }
+
+  if (fn.body?.string() != expected) {
+    console.error(`body is not ${expected}. got=${fn.body?.string()}`);
   }
 
   return true;

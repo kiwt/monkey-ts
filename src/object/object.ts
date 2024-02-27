@@ -1,3 +1,6 @@
+import { BlockStatement, Identifier } from "../ast/ast";
+import { Environment } from "./environment";
+
 export type ObjType = (typeof ObjType)[keyof typeof ObjType];
 
 export const ObjType = {
@@ -5,6 +8,7 @@ export const ObjType = {
   BOOLEAN_OBJ: "BOOLEAN",
   NULL_OBJ: "NULL",
   RETURN_VALUE_OBJ: "RETURN_VALUE",
+  FUNCTION_OBJ: "FUNCTION",
   ERROR_OBJ: "ERROR",
 } as const;
 
@@ -54,6 +58,35 @@ export class ReturnValueObj implements Obj {
   }
   inspect(): string {
     return this.value.inspect();
+  }
+}
+
+export class FunctionObj implements Obj {
+  constructor(
+    public env: Environment,
+    public parameters: Identifier[],
+    public body?: BlockStatement
+  ) {}
+
+  type(): ObjType {
+    return ObjType.FUNCTION_OBJ;
+  }
+  inspect(): string {
+    let out = "";
+
+    let params: string[] = [];
+    for (const p of this.parameters) {
+      params.push(p.string());
+    }
+
+    out += "fn";
+    out += "(";
+    out += params.join(", ");
+    out += ") {\n";
+    out += this.body?.string();
+    out += "\n}";
+
+    return out;
   }
 }
 

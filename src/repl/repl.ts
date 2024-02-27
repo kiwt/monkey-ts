@@ -23,6 +23,7 @@ export function start(): void {
     input: process.stdin,
     output: process.stdout,
   });
+  const env = new Environment();
 
   rl.setPrompt(">> ");
   rl.prompt();
@@ -33,11 +34,8 @@ export function start(): void {
     const program = parser.parseProgram();
     if (parser.errs.length != 0) {
       printParseErrors(process.stdout, parser.errs);
-      // } else {
-      // process.stdout.write(program?.string() + "\n");
     }
 
-    const env = new Environment();
     const evaluated = evaluate(env, program);
     if (evaluated !== undefined) {
       process.stdout.write(evaluated.inspect() + "\n");

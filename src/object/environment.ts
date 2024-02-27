@@ -1,14 +1,19 @@
 import { Obj } from "./object";
 
 export class Environment {
-  store: Map<string, Obj>;
+  private store: Map<string, Obj>;
+  private outer?: Environment;
 
-  constructor() {
-    this.store = new Map<string, Obj>();
+  constructor(outer?: Environment) {
+    this.store = new Map();
+    this.outer = outer;
   }
 
   public get(name: string): [Obj | undefined, boolean] {
-    const obj = this.store.get(name);
+    let obj = this.store.get(name);
+    if (!obj && this.outer) {
+      return this.outer.get(name);
+    }
     return [obj, obj !== undefined];
   }
 
