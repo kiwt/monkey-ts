@@ -3,7 +3,7 @@ import { Lexer } from "../lexer/lexer";
 import { Token, TokenKind } from "../token/token";
 import { Parser } from "../parser/parser";
 import { evaluate } from "../evaluator/evaluator";
-import { Environment } from "../environment/environment";
+import { Environment } from "../object/environment";
 
 const monkeyFace = `            __,__
    .--.  .-"     "-.  .--.

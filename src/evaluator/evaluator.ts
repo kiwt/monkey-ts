@@ -24,7 +24,7 @@ import {
   ObjType,
   ReturnValueObj,
 } from "../object/object";
-import { Environment } from "../environment/environment";
+import { Environment } from "../object/environment";
 
 export const NULL: NullObj = new NullObj();
 export const TRUE: BooleanObj = new BooleanObj(true);
@@ -57,6 +57,7 @@ export function evaluate(env: Environment, node?: Node): Obj | undefined {
         return val;
       }
       env.set(letStatement.name!.value, val!);
+      break;
     }
 
     // Expressions

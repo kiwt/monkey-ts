@@ -1,4 +1,4 @@
-import { Environment } from "../environment/environment";
+import { Environment } from "../object/environment";
 import { Lexer } from "../lexer/lexer";
 import { BooleanObj, ErrorObj, IntegerObj, Obj } from "../object/object";
 import { Parser } from "../parser/parser";
@@ -150,7 +150,7 @@ test("testLetStatement", () => {
 
   for (const tt of tests) {
     const evaluated = testEval(tt.input);
-    expect(testIntegerObj(evaluated, tt.expected));
+    expect(testIntegerObj(evaluated, tt.expected)).toBe(true);
   }
 });
 

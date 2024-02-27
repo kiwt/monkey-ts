@@ -1,4 +1,4 @@
-import { Obj } from "../object/object";
+import { Obj } from "./object";
 
 export class Environment {
   store: Map<string, Obj>;
