@@ -4,10 +4,10 @@ import { Identifier, LetStatement, Program } from "./ast";
 test("testString", () => {
   const program = new Program([
     new LetStatement(
-      { Type: TokenKind.Let, Literal: "let" },
-      new Identifier({ Type: TokenKind.Ident, Literal: "myVar" }, "myVar"),
+      { Type: TokenKind.LET, Literal: "let" },
+      new Identifier({ Type: TokenKind.IDENT, Literal: "myVar" }, "myVar"),
       new Identifier(
-        { Type: TokenKind.Ident, Literal: "anotherVar" },
+        { Type: TokenKind.IDENT, Literal: "anotherVar" },
         "anotherVar"
       )
     ),

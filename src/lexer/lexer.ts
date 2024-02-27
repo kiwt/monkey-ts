@@ -35,58 +35,58 @@ export class Lexer {
         if (this.peekChar() == "=") {
           let ch = this.ch;
           this.readChar();
-          tok = newToken(TokenKind.Eq, ch + this.ch);
+          tok = newToken(TokenKind.EQ, ch + this.ch);
           break;
         }
-        tok = newToken(TokenKind.Assign, this.ch);
+        tok = newToken(TokenKind.ASSIGN, this.ch);
         break;
       case "+":
-        tok = newToken(TokenKind.Plus, this.ch);
+        tok = newToken(TokenKind.PLUS, this.ch);
         break;
       case "-":
-        tok = newToken(TokenKind.Minus, this.ch);
+        tok = newToken(TokenKind.MINUS, this.ch);
         break;
       case "!":
         if (this.peekChar() == "=") {
           let ch = this.ch;
           this.readChar();
-          tok = newToken(TokenKind.NotEq, ch + this.ch);
+          tok = newToken(TokenKind.NOT_EQ, ch + this.ch);
           break;
         }
-        tok = newToken(TokenKind.Bang, this.ch);
+        tok = newToken(TokenKind.BANG, this.ch);
         break;
       case "/":
-        tok = newToken(TokenKind.Slash, this.ch);
+        tok = newToken(TokenKind.SLASH, this.ch);
         break;
       case "*":
-        tok = newToken(TokenKind.Asterisk, this.ch);
+        tok = newToken(TokenKind.ASTERISK, this.ch);
         break;
       case "<":
-        tok = newToken(TokenKind.Lt, this.ch);
+        tok = newToken(TokenKind.LT, this.ch);
         break;
       case ">":
-        tok = newToken(TokenKind.Gt, this.ch);
+        tok = newToken(TokenKind.GT, this.ch);
         break;
       case ";":
-        tok = newToken(TokenKind.Semicolon, this.ch);
+        tok = newToken(TokenKind.SEMICOLON, this.ch);
         break;
       case "(":
-        tok = newToken(TokenKind.LParen, this.ch);
+        tok = newToken(TokenKind.LPAREN, this.ch);
         break;
       case ")":
-        tok = newToken(TokenKind.RParen, this.ch);
+        tok = newToken(TokenKind.RPAREN, this.ch);
         break;
       case ",":
-        tok = newToken(TokenKind.Comma, this.ch);
+        tok = newToken(TokenKind.COMMA, this.ch);
         break;
       case "{":
-        tok = newToken(TokenKind.LBrace, this.ch);
+        tok = newToken(TokenKind.LBRACE, this.ch);
         break;
       case "}":
-        tok = newToken(TokenKind.RBrace, this.ch);
+        tok = newToken(TokenKind.RBRACE, this.ch);
         break;
       case "\0":
-        tok = newToken(TokenKind.Eof, "");
+        tok = newToken(TokenKind.EOF, "");
         break;
       default:
         if (isLetter(this.ch)) {
@@ -94,10 +94,10 @@ export class Lexer {
           tok = newToken(lookupIdent(literal), literal);
           return tok;
         } else if (isDigit(this.ch)) {
-          tok = newToken(TokenKind.Int, this.readNumber());
+          tok = newToken(TokenKind.INT, this.readNumber());
           return tok;
         } else {
-          tok = newToken(TokenKind.Illegal, this.ch);
+          tok = newToken(TokenKind.ILLEGAL, this.ch);
           break;
         }
     }

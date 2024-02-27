@@ -410,7 +410,7 @@ function testLetStatement(s: Statement | undefined, name: string): boolean {
     return false;
   }
 
-  if (s.tokenLiteral() !== TokenKind.Let) {
+  if (s.tokenLiteral() !== "let") {
     return false;
   }
 
@@ -464,7 +464,7 @@ function testReturnStatement(s: Statement | undefined, name: string): boolean {
     return false;
   }
 
-  if (s.tokenLiteral() !== TokenKind.Return) {
+  if (s.tokenLiteral() !== "return") {
     return false;
   }
 

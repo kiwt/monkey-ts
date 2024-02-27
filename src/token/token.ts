@@ -3,59 +3,59 @@ export interface Token {
   Literal: string;
 }
 
-// type TokenKind = { readonly Illegal: "illegal"}; { readonly Eof: "eof"} ...
-// keyof TokenKind = "Illegal" | "Eof" ...
-// type TokenType = "illegal" | "eof" ...
+// type TokenKind = { readonly ILLEGAL: "ILLEGAL"}; { readonly EOF: "EOF"} ...
+// keyof TokenKind = "ILLEGAL" | "EOF" ...
+// type TokenType = "ILLEGAL" | "EOF" ...
 export type TokenType = (typeof TokenKind)[keyof typeof TokenKind];
 
 export const TokenKind = {
-  Illegal: "illegal",
-  Eof: "eof",
+  ILLEGAL: "ILLEGAL",
+  EOF: "EOF",
 
   // Identifiers + literals
-  Ident: "ident", // add, foobar, x, y, ...
-  Int: "int",
+  IDENT: "IDENT", // add, foobar, x, y, ...
+  INT: "INT",
 
   // Operators
-  Assign: "=",
-  Plus: "+",
-  Minus: "-",
-  Bang: "!",
-  Asterisk: "*",
-  Slash: "/",
+  ASSIGN: "=",
+  PLUS: "+",
+  MINUS: "-",
+  BANG: "!",
+  ASTERISK: "*",
+  SLASH: "/",
 
-  Lt: "<",
-  Gt: ">",
-  Eq: "==",
-  NotEq: "!=",
+  LT: "<",
+  GT: ">",
+  EQ: "==",
+  NOT_EQ: "!=",
 
   // Delimiters
-  Comma: ",",
-  Semicolon: ";",
+  COMMA: ",",
+  SEMICOLON: ";",
 
-  LParen: "(",
-  RParen: ")",
-  LBrace: "{",
-  RBrace: "}",
+  LPAREN: "(",
+  RPAREN: ")",
+  LBRACE: "{",
+  RBRACE: "}",
 
   // Keywords
-  Function: "function",
-  Let: "let",
-  True: "true",
-  False: "false",
-  If: "if",
-  Else: "else",
-  Return: "return",
+  FUNCTION: "FUNCTION",
+  LET: "LET",
+  TRUE: "TRUE",
+  FALSE: "FALSE",
+  IF: "IF",
+  ELSE: "ELSE",
+  RETURN: "RETURN",
 } as const;
 
 const keywords = new Map<string, TokenType>([
-  ["fn", TokenKind.Function],
-  ["let", TokenKind.Let],
-  ["true", TokenKind.True],
-  ["false", TokenKind.False],
-  ["if", TokenKind.If],
-  ["else", TokenKind.Else],
-  ["return", TokenKind.Return],
+  ["fn", TokenKind.FUNCTION],
+  ["let", TokenKind.LET],
+  ["true", TokenKind.TRUE],
+  ["false", TokenKind.FALSE],
+  ["if", TokenKind.IF],
+  ["else", TokenKind.ELSE],
+  ["return", TokenKind.RETURN],
 ]);
 
 export function lookupIdent(ident: string): TokenType {
@@ -64,5 +64,5 @@ export function lookupIdent(ident: string): TokenType {
     return tokType;
   }
 
-  return TokenKind.Ident;
+  return TokenKind.IDENT;
 }
