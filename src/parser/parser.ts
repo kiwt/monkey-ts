@@ -14,6 +14,7 @@ import {
   Program,
   ReturnStatement,
   Statement,
+  StringLiteral,
 } from "../ast/ast";
 import { Lexer } from "../lexer/lexer";
 import { Token, TokenKind, TokenType } from "../token/token";
@@ -61,6 +62,7 @@ export class Parser {
     this.prefixParseFns = new Map<TokenType, PrefixParseFn>([
       [TokenKind.IDENT, this.parseIdentifier],
       [TokenKind.INT, this.parseIntegerLiteral],
+      [TokenKind.STRING, this.parseStringLiteral],
       [TokenKind.FUNCTION, this.parseFunctionLiteral],
       [TokenKind.BANG, this.parsePrefixExpression],
       [TokenKind.MINUS, this.parsePrefixExpression],
@@ -222,6 +224,10 @@ export class Parser {
     lit.value = value;
 
     return lit;
+  };
+
+  private parseStringLiteral = (): Expression | undefined => {
+    return new StringLiteral(this.curToken, this.curToken.Literal);
   };
 
   private parseFunctionLiteral = (): Expression | undefined => {

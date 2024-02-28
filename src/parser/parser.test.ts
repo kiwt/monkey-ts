@@ -12,6 +12,7 @@ import {
   FunctionLiteral,
   CallExpression,
   IfExpression,
+  StringLiteral,
 } from "../ast/ast";
 import { Lexer } from "../lexer/lexer";
 import { TokenKind } from "../token/token";
@@ -401,6 +402,24 @@ test("testCallExpressionParsing", () => {
   expect(testLiteralExpression(exp.args[0], 1)).toBeTruthy();
   expect(testInfixExpression(exp.args[1], 2, "*", 3)).toBeTruthy();
   expect(testInfixExpression(exp.args[2], 4, "+", 5)).toBeTruthy();
+});
+
+test("testStringLiteralExpression", () => {
+  const input = `"hello world"`;
+
+  const l = new Lexer(input);
+  const p = new Parser(l);
+
+  const program = p.parseProgram();
+  checkParserErrors(p);
+
+  const stmt = program?.statements[0] as ExpressionStatement;
+  expect(stmt instanceof ExpressionStatement).toBeTruthy();
+
+  const literal = stmt.expression as StringLiteral;
+  expect(literal instanceof StringLiteral).toBeTruthy();
+
+  expect(literal.value).toStrictEqual("hello world");
 });
 
 // test helper functions are below.

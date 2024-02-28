@@ -18,6 +18,8 @@ let ten = 10;
 
    10 == 10;
    10 != 9;
+   "foobar"
+   "foo bar"
     `;
   const expected: Token[] = [
     { Type: TokenKind.LET, Literal: "let" },
@@ -93,6 +95,8 @@ let ten = 10;
     { Type: TokenKind.NOT_EQ, Literal: "!=" },
     { Type: TokenKind.INT, Literal: "9" },
     { Type: TokenKind.SEMICOLON, Literal: ";" },
+    { Type: TokenKind.STRING, Literal: "foobar" },
+    { Type: TokenKind.STRING, Literal: "foo bar" },
     { Type: TokenKind.EOF, Literal: "" },
   ];
 

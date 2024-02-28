@@ -15,6 +15,7 @@ export const TokenKind = {
   // Identifiers + literals
   IDENT: "IDENT", // add, foobar, x, y, ...
   INT: "INT",
+  STRING: "STRING",
 
   // Operators
   ASSIGN: "=",

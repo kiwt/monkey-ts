@@ -16,6 +16,7 @@ export const NodeKind = {
   Boolean: 11,
   FunctionLiteral: 12,
   CallExpression: 13,
+  StringLiteral: 14,
 } as const;
 
 export interface Node {
@@ -196,6 +197,24 @@ export class IntegerLiteral implements Expression {
 
   kind(): NodeType {
     return NodeKind.IntegerLiteral;
+  }
+}
+
+export class StringLiteral implements Expression {
+  constructor(public token: Token, public value: string) {}
+
+  expressionNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    return this.token.Literal;
+  }
+
+  kind(): NodeType {
+    return NodeKind.StringLiteral;
   }
 }
 

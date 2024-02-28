@@ -16,6 +16,7 @@ import {
   FunctionLiteral,
   CallExpression,
   Expression,
+  StringLiteral,
 } from "../ast/ast";
 import {
   BooleanObj,
@@ -26,8 +27,10 @@ import {
   Obj,
   ObjType,
   ReturnValueObj,
+  StringObj,
 } from "../object/object";
 import { Environment } from "../object/environment";
+import * as readline from "readline";
 
 export const NULL: NullObj = new NullObj();
 export const TRUE: BooleanObj = new BooleanObj(true);
@@ -79,6 +82,9 @@ export function evaluate(env: Environment, node?: Node): Obj | undefined {
 
     case NodeKind.Boolean:
       return nativeBoolToBooleanObject((node as Boolean).value);
+
+    case NodeKind.StringLiteral:
+      return new StringObj((node as StringLiteral).value);
 
     case NodeKind.CallExpression: {
       const fn = evaluate(env, (node as CallExpression).func);
@@ -187,6 +193,13 @@ function evalInfixExpression(
     return newError(
       `type mismatch: ${left.type()} ${operator} ${right.type()}`
     );
+  }
+
+  if (
+    left.type() === ObjType.STRING_OBJ &&
+    right.type() === ObjType.STRING_OBJ
+  ) {
+    return evalStringInfixExpression(operator, left, right);
   }
 
   return newError(
@@ -309,6 +322,23 @@ function evalIdentifier(env: Environment, node: Identifier): Obj | undefined {
   }
 
   return val;
+}
+
+function evalStringInfixExpression(
+  operator: string,
+  left: Obj,
+  right: Obj
+): Obj {
+  if (operator !== "+") {
+    return newError(
+      `unknown operator: ${left.type()} ${operator} ${right.type()}`
+    );
+  }
+
+  const leftVal = (left as StringObj).value;
+  const rightVal = (right as StringObj).value;
+
+  return new StringObj(leftVal + rightVal);
 }
 
 function applyFunction(args: Obj[], fn?: Obj): Obj | undefined {

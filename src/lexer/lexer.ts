@@ -85,6 +85,10 @@ export class Lexer {
       case "}":
         tok = newToken(TokenKind.RBRACE, this.ch);
         break;
+      case '"':
+        const str = this.readString();
+        tok = newToken(TokenKind.STRING, str);
+        break;
       case "\0":
         tok = newToken(TokenKind.EOF, "");
         break;
@@ -119,6 +123,18 @@ export class Lexer {
     let position = this.position;
     while (isDigit(this.ch)) {
       this.readChar();
+    }
+
+    return this.input.substring(position, this.position);
+  }
+
+  private readString(): string {
+    let position = this.position + 1;
+    while (true) {
+      this.readChar();
+      if (this.ch === '"' || this.ch === "\0") {
+        break;
+      }
     }
 
     return this.input.substring(position, this.position);

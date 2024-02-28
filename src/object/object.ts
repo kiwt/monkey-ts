@@ -6,6 +6,7 @@ export type ObjType = (typeof ObjType)[keyof typeof ObjType];
 export const ObjType = {
   INTEGER_OBJ: "INTEGER",
   BOOLEAN_OBJ: "BOOLEAN",
+  STRING_OBJ: "STRING",
   NULL_OBJ: "NULL",
   RETURN_VALUE_OBJ: "RETURN_VALUE",
   FUNCTION_OBJ: "FUNCTION",
@@ -37,6 +38,17 @@ export class BooleanObj implements Obj {
 
   inspect(): string {
     return String(this.value);
+  }
+}
+
+export class StringObj implements Obj {
+  constructor(public value: string) {}
+  type(): ObjType {
+    return ObjType.STRING_OBJ;
+  }
+
+  inspect(): string {
+    return this.value.toString();
   }
 }
 

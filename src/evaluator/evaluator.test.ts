@@ -6,6 +6,7 @@ import {
   FunctionObj,
   IntegerObj,
   Obj,
+  StringObj,
 } from "../object/object";
 import { Parser } from "../parser/parser";
 import { NULL, evaluate } from "./evaluator";
@@ -83,6 +84,12 @@ test("testBooleanExpression", () => {
     const evaluated = testEval(tt.input);
     expect(testBooleanObj(evaluated, tt.expected)).toBe(true);
   }
+});
+
+test("testStringLiteral", () => {
+  const input = `"Hello World!"`;
+  const evaluated = testEval(input);
+  expect(testStringObj(evaluated, "Hello World!")).toBe(true);
 });
 
 test("testBangOperator", () => {
@@ -223,6 +230,10 @@ test("testErrorHandling", () => {
       input: "foobar",
       expected: "identifier not found: foobar",
     },
+    {
+      input: `"Hello" - "World"`,
+      expected: "unknown operator: STRING - STRING",
+    },
   ];
 
   for (const tt of tests) {
@@ -258,6 +269,21 @@ function testBooleanObj(obj: Obj, expected: boolean): boolean {
   const result = obj as BooleanObj;
   if (result === undefined) {
     console.error(`Obj is not Integer. got=${obj.constructor.name} (${obj})`);
+    return false;
+  }
+
+  if (result.value !== expected) {
+    console.error(`Obj has wrong value. got=${result.value}, want=${expected}`);
+    return false;
+  }
+
+  return true;
+}
+
+function testStringObj(obj: Obj, expected: string): boolean {
+  const result = obj as StringObj;
+  if (result === undefined) {
+    console.error(`Obj is not String. got=${obj.constructor.name} (${obj})`);
     return false;
   }
 
