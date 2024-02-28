@@ -204,6 +204,52 @@ test("testClosures", () => {
   expect(testIntegerObj(evaluated, 4)).toBe(true);
 });
 
+test("testBuiltinFunctions", () => {
+  const tests: { input: string; expected: any }[] = [
+    { input: 'len("")', expected: 0 },
+    { input: 'len("four")', expected: 4 },
+    { input: 'len("hello world")', expected: 11 },
+    {
+      input: "len(1)",
+      expected: `argument to "len" not supported, got INTEGER`,
+    },
+    {
+      input: 'len("one", "two")',
+      expected: "wrong number of arguments. got=2, want=1",
+    },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+
+    switch (typeof tt.expected) {
+      case "number":
+        expect(testIntegerObj(evaluated, tt.expected as number)).toBe(true);
+        break;
+      case "string":
+        const expectedError = tt.expected as string;
+        if (evaluated instanceof ErrorObj) {
+          const errObj = evaluated as ErrorObj;
+          if (errObj.message !== expectedError) {
+            console.error(
+              "wrong error message. expected=%q, got=%q",
+              expectedError
+            );
+            expect(true).toBe(false); // fail test.
+          }
+        } else {
+          console.error(
+            "object is not Error. got=%s",
+            evaluated.constructor.name
+          );
+          expect(true).toBe(false); // fail test.
+        }
+        expect(true).toBe(true);
+        break;
+    }
+  }
+});
+
 test("testErrorHandling", () => {
   const tests: { input: string; expected: string }[] = [
     {

@@ -20,6 +20,7 @@ import {
 } from "../ast/ast";
 import {
   BooleanObj,
+  BuiltinObj,
   ErrorObj,
   FunctionObj,
   IntegerObj,
@@ -31,6 +32,7 @@ import {
 } from "../object/object";
 import { Environment } from "../object/environment";
 import * as readline from "readline";
+import { builtins } from "./builtin";
 
 export const NULL: NullObj = new NullObj();
 export const TRUE: BooleanObj = new BooleanObj(true);
@@ -317,11 +319,16 @@ function evalExpressions(env: Environment, exps: Expression[]): Obj[] {
 
 function evalIdentifier(env: Environment, node: Identifier): Obj | undefined {
   const [val, ok] = env.get(node.value);
-  if (!ok) {
-    return newError(`identifier not found: ${node.value}`);
+  if (ok) {
+    return val;
   }
 
-  return val;
+  const builtin = builtins.get(node.value);
+  if (builtin !== undefined) {
+    return builtin;
+  }
+
+  return newError(`identifier not found: ${node.value}`);
 }
 
 function evalStringInfixExpression(
@@ -346,9 +353,27 @@ function applyFunction(args: Obj[], fn?: Obj): Obj | undefined {
     return undefined;
   }
 
+  switch (fn.type()) {
+    case ObjType.FUNCTION_OBJ: {
+      const func = fn as FunctionObj;
+      if (!(func instanceof FunctionObj)) {
+        return newError(`not a function: ${fn?.type()}`);
+      }
+      const extendedEnv = extendFunctionEnv(args, func);
+      const evaluated = evaluate(extendedEnv, func.body);
+      return unwrapReturnValue(evaluated!);
+    }
+
+    case ObjType.BUILTIN_OBJ: {
+      return (fn as BuiltinObj).fn(...args);
+    }
+
+    default:
+      return newError(`not a function: ${fn?.type()}`);
+  }
+
   const func = fn as FunctionObj;
   if (!(func instanceof FunctionObj)) {
-    return newError(`not a function: ${fn?.type()}`);
   }
 
   const extendedEnv = extendFunctionEnv(args, func);
@@ -396,7 +421,7 @@ function isError(obj: Obj | undefined): boolean {
   return false;
 }
 
-function newError(format: string, ...args: any[]): ErrorObj {
+export function newError(format: string, ...args: any[]): ErrorObj {
   const message = `${format}${args.map((arg) => typeof arg).join(",")}`;
   return new ErrorObj(message);
 }

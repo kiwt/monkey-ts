@@ -10,6 +10,7 @@ export const ObjType = {
   NULL_OBJ: "NULL",
   RETURN_VALUE_OBJ: "RETURN_VALUE",
   FUNCTION_OBJ: "FUNCTION",
+  BUILTIN_OBJ: "BUILTIN",
   ERROR_OBJ: "ERROR",
 } as const;
 
@@ -99,6 +100,18 @@ export class FunctionObj implements Obj {
     out += "\n}";
 
     return out;
+  }
+}
+
+export type BuiltinFunction = (...args: Obj[]) => Obj;
+export class BuiltinObj implements Obj {
+  constructor(public fn: BuiltinFunction) {}
+
+  type(): ObjType {
+    return ObjType.BUILTIN_OBJ;
+  }
+  inspect(): string {
+    return "builtin function";
   }
 }
 
