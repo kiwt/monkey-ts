@@ -1,5 +1,6 @@
 import { BlockStatement, Identifier } from "../ast/ast";
 import { Environment } from "./environment";
+import { start } from "../repl/repl";
 
 export type ObjType = (typeof ObjType)[keyof typeof ObjType];
 
@@ -11,6 +12,7 @@ export const ObjType = {
   RETURN_VALUE_OBJ: "RETURN_VALUE",
   FUNCTION_OBJ: "FUNCTION",
   BUILTIN_OBJ: "BUILTIN",
+  ARRAY_OBJ: "ARRAY",
   ERROR_OBJ: "ERROR",
 } as const;
 
@@ -112,6 +114,28 @@ export class BuiltinObj implements Obj {
   }
   inspect(): string {
     return "builtin function";
+  }
+}
+
+export class ArrayObj implements Obj {
+  constructor(public elements: Obj[]) {}
+
+  type(): ObjType {
+    return ObjType.ARRAY_OBJ;
+  }
+  inspect(): string {
+    let out = "";
+
+    let elements: string[] = [];
+    for (const e of this.elements) {
+      elements.push(e.inspect());
+    }
+
+    out += "[";
+    out += elements.join(", ");
+    out += "]";
+
+    return out;
   }
 }
 

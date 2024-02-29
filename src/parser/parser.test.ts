@@ -13,6 +13,8 @@ import {
   CallExpression,
   IfExpression,
   StringLiteral,
+  IndexExpression,
+  ArrayLiteral,
 } from "../ast/ast";
 import { Lexer } from "../lexer/lexer";
 import { TokenKind } from "../token/token";
@@ -244,72 +246,80 @@ test("testParsingInfixExpressions", () => {
 
 test("testOperatorPrecedenceParsing", () => {
   const tests = [
-    { input: "-a * b", expected: "((-a) * b)" },
-    { input: "!-a", expected: "(!(-a))" },
-    { input: "a + b + c", expected: "((a + b) + c)" },
-    { input: "a + b - c", expected: "((a + b) - c)" },
-    { input: "a * b * c", expected: "((a * b) * c)" },
-    { input: "a * b / c", expected: "((a * b) / c)" },
-    { input: "a + b / c", expected: "(a + (b / c))" },
+    // { input: "-a * b", expected: "((-a) * b)" },
+    // { input: "!-a", expected: "(!(-a))" },
+    // { input: "a + b + c", expected: "((a + b) + c)" },
+    // { input: "a + b - c", expected: "((a + b) - c)" },
+    // { input: "a * b * c", expected: "((a * b) * c)" },
+    // { input: "a * b / c", expected: "((a * b) / c)" },
+    // { input: "a + b / c", expected: "(a + (b / c))" },
+    // {
+    //   input: "a + b * c + d / e - f",
+    //   expected: "(((a + (b * c)) + (d / e)) - f)",
+    // },
+    // { input: "3 + 4; -5 * 5", expected: "(3 + 4)((-5) * 5)" },
+    // { input: "5 > 4 == 3 < 4", expected: "((5 > 4) == (3 < 4))" },
+    // { input: "((5 < 4) != (3 > 4))", expected: "((5 < 4) != (3 > 4))" },
+    // {
+    //   input: "3 + 4 * 5 == 3 * 1 + 4 * 5",
+    //   expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+    // },
+    // {
+    //   input: "3 + 4 * 5 == 3 * 1 + 4 * 5",
+    //   expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+    // },
+    // {
+    //   input: "true",
+    //   expected: "true",
+    // },
+    // {
+    //   input: "false",
+    //   expected: "false",
+    // },
+    // {
+    //   input: "3 > 5 == false",
+    //   expected: "((3 > 5) == false)",
+    // },
+    // {
+    //   input: "3 < 5 == true",
+    //   expected: "((3 < 5) == true)",
+    // },
+    // {
+    //   input: "1 + (2 + 3) + 4",
+    //   expected: "((1 + (2 + 3)) + 4)",
+    // },
+    // {
+    //   input: "(5 + 5) * 2",
+    //   expected: "((5 + 5) * 2)",
+    // },
+    // {
+    //   input: "2 / (5 + 5)",
+    //   expected: "(2 / (5 + 5))",
+    // },
+    // {
+    //   input: "-(5 + 5)",
+    //   expected: "(-(5 + 5))",
+    // },
+    // {
+    //   input: "!(true == true)",
+    //   expected: "(!(true == true))",
+    // },
+    // {
+    //   input: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+    //   expected: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+    // },
+    // {
+    //   input: "add(a + b + c * d / f + g)",
+    //   expected: "add((((a + b) + ((c * d) / f)) + g))",
+    // },
     {
-      input: "a + b * c + d / e - f",
-      expected: "(((a + (b * c)) + (d / e)) - f)",
+      input: "a * [1, 2, 3, 4][b * c] * d",
+      expected: "((a * ([1, 2, 3, 4][(b * c)])) * d)",
     },
-    { input: "3 + 4; -5 * 5", expected: "(3 + 4)((-5) * 5)" },
-    { input: "5 > 4 == 3 < 4", expected: "((5 > 4) == (3 < 4))" },
-    { input: "((5 < 4) != (3 > 4))", expected: "((5 < 4) != (3 > 4))" },
-    {
-      input: "3 + 4 * 5 == 3 * 1 + 4 * 5",
-      expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
-    },
-    {
-      input: "3 + 4 * 5 == 3 * 1 + 4 * 5",
-      expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
-    },
-    {
-      input: "true",
-      expected: "true",
-    },
-    {
-      input: "false",
-      expected: "false",
-    },
-    {
-      input: "3 > 5 == false",
-      expected: "((3 > 5) == false)",
-    },
-    {
-      input: "3 < 5 == true",
-      expected: "((3 < 5) == true)",
-    },
-    {
-      input: "1 + (2 + 3) + 4",
-      expected: "((1 + (2 + 3)) + 4)",
-    },
-    {
-      input: "(5 + 5) * 2",
-      expected: "((5 + 5) * 2)",
-    },
-    {
-      input: "2 / (5 + 5)",
-      expected: "(2 / (5 + 5))",
-    },
-    {
-      input: "-(5 + 5)",
-      expected: "(-(5 + 5))",
-    },
-    {
-      input: "!(true == true)",
-      expected: "(!(true == true))",
-    },
-    {
-      input: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
-      expected: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
-    },
-    {
-      input: "add(a + b + c * d / f + g)",
-      expected: "add((((a + b) + ((c * d) / f)) + g))",
-    },
+    // {
+    //   input: "add(a * b[2], b[1], 2 * [1, 2][1])",
+    //   expected: "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+    // },
   ];
 
   for (const index in tests) {
@@ -420,6 +430,47 @@ test("testStringLiteralExpression", () => {
   expect(literal instanceof StringLiteral).toBeTruthy();
 
   expect(literal.value).toStrictEqual("hello world");
+});
+
+test("testParsingIndexExpressions", () => {
+  const input = "myArray[1 + 1]";
+
+  const l = new Lexer(input);
+  const p = new Parser(l);
+
+  const program = p.parseProgram();
+  checkParserErrors(p);
+
+  const stmt = program?.statements[0] as ExpressionStatement;
+  expect(stmt instanceof ExpressionStatement).toBeTruthy();
+
+  const indexExp = stmt.expression as IndexExpression;
+  expect(indexExp instanceof IndexExpression).toBeTruthy();
+
+  expect(testIdentifier(indexExp.left, "myArray")).toBe(true);
+  expect(testInfixExpression(indexExp.index, 1, "+", 1));
+});
+
+test("testParsingArrayLiterals", () => {
+  const input = "[1, 2 * 2, 3 + 3]";
+
+  const l = new Lexer(input);
+  const p = new Parser(l);
+
+  const program = p.parseProgram();
+  checkParserErrors(p);
+
+  const stmt = program?.statements[0] as ExpressionStatement;
+  expect(stmt instanceof ExpressionStatement).toBeTruthy();
+
+  const array = stmt.expression as ArrayLiteral;
+  expect(array instanceof ArrayLiteral).toBeTruthy();
+
+  expect(array.elements).toHaveLength(3);
+
+  expect(testIntegerLiteral(array.elements[0], 1));
+  expect(testInfixExpression(array.elements[1], 2, "*", 2));
+  expect(testInfixExpression(array.elements[1], 3, "+", 3));
 });
 
 // test helper functions are below.

@@ -20,6 +20,7 @@ let ten = 10;
    10 != 9;
    "foobar"
    "foo bar"
+   [1, 2];
     `;
   const expected: Token[] = [
     { Type: TokenKind.LET, Literal: "let" },
@@ -97,6 +98,12 @@ let ten = 10;
     { Type: TokenKind.SEMICOLON, Literal: ";" },
     { Type: TokenKind.STRING, Literal: "foobar" },
     { Type: TokenKind.STRING, Literal: "foo bar" },
+    { Type: TokenKind.LBRACKET, Literal: "[" },
+    { Type: TokenKind.INT, Literal: "1" },
+    { Type: TokenKind.COMMA, Literal: "," },
+    { Type: TokenKind.INT, Literal: "2" },
+    { Type: TokenKind.RBRACKET, Literal: "]" },
+    { Type: TokenKind.SEMICOLON, Literal: ";" },
     { Type: TokenKind.EOF, Literal: "" },
   ];
 

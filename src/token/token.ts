@@ -38,6 +38,8 @@ export const TokenKind = {
   RPAREN: ")",
   LBRACE: "{",
   RBRACE: "}",
+  LBRACKET: "[",
+  RBRACKET: "]",
 
   // Keywords
   FUNCTION: "FUNCTION",

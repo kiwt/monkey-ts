@@ -17,6 +17,8 @@ export const NodeKind = {
   FunctionLiteral: 12,
   CallExpression: 13,
   StringLiteral: 14,
+  ArrayLiteral: 15,
+  IndexExpression: 16,
 } as const;
 
 export interface Node {
@@ -366,6 +368,35 @@ export class FunctionLiteral implements Expression {
   }
 }
 
+export class ArrayLiteral implements Expression {
+  constructor(public token: Token, public elements: Expression[]) {}
+
+  expressionNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    let elements: string[] = [];
+    for (const el of this.elements) {
+      elements.push(el.string());
+    }
+
+    out += "[";
+    out += elements.join(", ");
+    out += "]";
+
+    return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.ArrayLiteral;
+  }
+}
+
 export class CallExpression implements Expression {
   constructor(
     public token: Token,
@@ -396,5 +427,34 @@ export class CallExpression implements Expression {
 
   kind(): NodeType {
     return NodeKind.CallExpression;
+  }
+}
+
+export class IndexExpression implements Expression {
+  constructor(
+    public token: Token, // The [ Token
+    public left: Expression,
+    public index?: Expression
+  ) {}
+
+  expressionNode(): void {}
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    out += "(";
+    out += this.left.string();
+    out += "[";
+    out += this.index?.string();
+    out += "])";
+
+    return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.IndexExpression;
   }
 }

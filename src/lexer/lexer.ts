@@ -85,6 +85,12 @@ export class Lexer {
       case "}":
         tok = newToken(TokenKind.RBRACE, this.ch);
         break;
+      case "[":
+        tok = newToken(TokenKind.LBRACKET, this.ch);
+        break;
+      case "]":
+        tok = newToken(TokenKind.RBRACKET, this.ch);
+        break;
       case '"':
         const str = this.readString();
         tok = newToken(TokenKind.STRING, str);

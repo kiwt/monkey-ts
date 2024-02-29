@@ -17,8 +17,11 @@ import {
   CallExpression,
   Expression,
   StringLiteral,
+  ArrayLiteral,
+  IndexExpression,
 } from "../ast/ast";
 import {
+  ArrayObj,
   BooleanObj,
   BuiltinObj,
   ErrorObj,
@@ -101,6 +104,14 @@ export function evaluate(env: Environment, node?: Node): Obj | undefined {
       return applyFunction(args, fn);
     }
 
+    case NodeKind.ArrayLiteral: {
+      const elements = evalExpressions(env, (node as ArrayLiteral).elements);
+      if (elements.length === 1 && isError(elements[0])) {
+        return elements[0];
+      }
+      return new ArrayObj(elements);
+    }
+
     case NodeKind.IfExpression:
       return evalIfExpression(env, node as IfExpression);
 
@@ -127,6 +138,19 @@ export function evaluate(env: Environment, node?: Node): Obj | undefined {
       }
 
       return evalInfixExpression(infixExp.operator, left, right);
+    }
+
+    case NodeKind.IndexExpression: {
+      const left = evaluate(env, (node as IndexExpression).left);
+      if (isError(left)) {
+        return left;
+      }
+      const index = evaluate(env, (node as IndexExpression).index);
+      if (isError(index)) {
+        return index;
+      }
+
+      return evalIndexExpression(left, index);
     }
   }
 
@@ -346,6 +370,28 @@ function evalStringInfixExpression(
   const rightVal = (right as StringObj).value;
 
   return new StringObj(leftVal + rightVal);
+}
+
+function evalIndexExpression(left?: Obj, index?: Obj): Obj {
+  switch (true) {
+    case left?.type() === ObjType.ARRAY_OBJ &&
+      index?.type() == ObjType.INTEGER_OBJ:
+      return evalArrayIndexExpression(left, index);
+
+    default:
+      return newError(`index operator not supported: ${left?.type()}`);
+  }
+}
+
+function evalArrayIndexExpression(array: Obj, index: Obj): Obj {
+  const arrayObject = array as ArrayObj;
+  const idx = (index as IntegerObj).value;
+  const max = arrayObject.elements.length - 1;
+
+  if (idx < 0 || idx > max) {
+    return NULL;
+  }
+  return arrayObject.elements[idx];
 }
 
 function applyFunction(args: Obj[], fn?: Obj): Obj | undefined {
