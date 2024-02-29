@@ -417,14 +417,6 @@ function applyFunction(args: Obj[], fn?: Obj): Obj | undefined {
     default:
       return newError(`not a function: ${fn?.type()}`);
   }
-
-  const func = fn as FunctionObj;
-  if (!(func instanceof FunctionObj)) {
-  }
-
-  const extendedEnv = extendFunctionEnv(args, func);
-  const evaluated = evaluate(extendedEnv, func.body);
-  return unwrapReturnValue(evaluated!);
 }
 
 function extendFunctionEnv(args: Obj[], fn: FunctionObj): Environment {
