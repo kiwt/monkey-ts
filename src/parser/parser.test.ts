@@ -42,12 +42,12 @@ test("testLetStatement", () => {
 
     const stmt = program?.statements[0] as Statement;
     expect(stmt).toBeDefined();
-    expect(testLetStatement(stmt, tt.expectedIdentifier)).toBeTruthy();
+    expect(testLetStatement(stmt, tt.expectedIdentifier)).toBe(true);
 
     const letStmt = stmt as LetStatement;
     expect(letStmt).toBeDefined();
 
-    expect(testLiteralExpression(letStmt.value, tt.expectedValue)).toBeTruthy();
+    expect(testLiteralExpression(letStmt.value, tt.expectedValue)).toBe(true);
   }
 });
 
@@ -67,7 +67,7 @@ test("testReturnStatement", () => {
   expect(program?.statements).toHaveLength(3);
 
   for (const stmt of program ? program.statements : []) {
-    expect(testReturnStatement(stmt, "return")).toBeTruthy();
+    expect(testReturnStatement(stmt, "return")).toBe(true);
   }
 });
 
@@ -82,9 +82,7 @@ test("testIdentifierExpression", () => {
 
   expect(program?.statements).toHaveLength(1);
 
-  expect(
-    testIdentifierExpression(program?.statements[0], "foobar")
-  ).toBeTruthy();
+  expect(testIdentifierExpression(program?.statements[0], "foobar")).toBe(true);
 });
 
 function testIdentifierExpression(
@@ -127,7 +125,7 @@ test("testIntegerLiteralExpression", () => {
 
   expect(program?.statements).toHaveLength(1);
 
-  expect(testIntegerLiteralExpression(program?.statements[0], 5)).toBeTruthy();
+  expect(testIntegerLiteralExpression(program?.statements[0], 5)).toBe(true);
 });
 
 test("testIfExpression", () => {
@@ -141,9 +139,9 @@ test("testIfExpression", () => {
 
   expect(program?.statements).toHaveLength(1);
 
-  expect(
-    testIfExpression(program?.statements[0], "x", "<", "y", "x")
-  ).toBeTruthy();
+  expect(testIfExpression(program?.statements[0], "x", "<", "y", "x")).toBe(
+    true
+  );
 });
 
 test("testBooleanExpression", () => {
@@ -163,7 +161,7 @@ test("testBooleanExpression", () => {
 
     expect(
       testBooleanExpression(program?.statements[0], booleanTests[index].value)
-    ).toBeTruthy();
+    ).toBe(true);
   }
 });
 
@@ -190,7 +188,7 @@ test("testParsingPrefixExpressions", () => {
         prefixTests[index].operator,
         prefixTests[index].integerValue
       )
-    ).toBeTruthy();
+    ).toBe(true);
   }
 });
 
@@ -240,7 +238,7 @@ test("testParsingInfixExpressions", () => {
         infixTests[index].operator,
         infixTests[index].rightValue
       )
-    ).toBeTruthy();
+    ).toBe(true);
   }
 });
 
@@ -351,15 +349,15 @@ test("testFunctionLiteralParsing", () => {
   expect(func).toBeDefined();
   expect(func.parameters).toHaveLength(2);
 
-  expect(testLiteralExpression(func.parameters[0], "x")).toBeTruthy();
-  expect(testLiteralExpression(func.parameters[1], "y")).toBeTruthy();
+  expect(testLiteralExpression(func.parameters[0], "x")).toBe(true);
+  expect(testLiteralExpression(func.parameters[1], "y")).toBe(true);
 
   expect(func.body?.statements).toHaveLength(1);
 
   const bodyStmt = func.body?.statements[0] as ExpressionStatement;
   expect(bodyStmt).toBeDefined();
 
-  expect(testInfixExpression(bodyStmt.expression, "x", "+", "y")).toBeTruthy();
+  expect(testInfixExpression(bodyStmt.expression, "x", "+", "y")).toBe(true);
 });
 
 test("testFunctionParameterParsing", () => {
@@ -385,7 +383,7 @@ test("testFunctionParameterParsing", () => {
     expect(func?.parameters).toHaveLength(tt.expectedParams.length);
 
     tt.expectedParams.forEach((ident, index) => {
-      expect(testLiteralExpression(func.parameters[index], ident)).toBeTruthy();
+      expect(testLiteralExpression(func.parameters[index], ident)).toBe(true);
     });
   }
 });
@@ -407,11 +405,11 @@ test("testCallExpressionParsing", () => {
   const exp = stmt.expression as CallExpression;
   expect(exp).toBeDefined();
 
-  expect(testIdentifier(exp.func, "add")).toBeTruthy();
+  expect(testIdentifier(exp.func, "add")).toBe(true);
 
-  expect(testLiteralExpression(exp.args[0], 1)).toBeTruthy();
-  expect(testInfixExpression(exp.args[1], 2, "*", 3)).toBeTruthy();
-  expect(testInfixExpression(exp.args[2], 4, "+", 5)).toBeTruthy();
+  expect(testLiteralExpression(exp.args[0], 1)).toBe(true);
+  expect(testInfixExpression(exp.args[1], 2, "*", 3)).toBe(true);
+  expect(testInfixExpression(exp.args[2], 4, "+", 5)).toBe(true);
 });
 
 test("testStringLiteralExpression", () => {
@@ -424,10 +422,10 @@ test("testStringLiteralExpression", () => {
   checkParserErrors(p);
 
   const stmt = program?.statements[0] as ExpressionStatement;
-  expect(stmt instanceof ExpressionStatement).toBeTruthy();
+  expect(stmt instanceof ExpressionStatement).toBe(true);
 
   const literal = stmt.expression as StringLiteral;
-  expect(literal instanceof StringLiteral).toBeTruthy();
+  expect(literal instanceof StringLiteral).toBe(true);
 
   expect(literal.value).toStrictEqual("hello world");
 });
@@ -442,13 +440,13 @@ test("testParsingIndexExpressions", () => {
   checkParserErrors(p);
 
   const stmt = program?.statements[0] as ExpressionStatement;
-  expect(stmt instanceof ExpressionStatement).toBeTruthy();
+  expect(stmt instanceof ExpressionStatement).toBe(true);
 
   const indexExp = stmt.expression as IndexExpression;
-  expect(indexExp instanceof IndexExpression).toBeTruthy();
+  expect(indexExp instanceof IndexExpression).toBe(true);
 
   expect(testIdentifier(indexExp.left, "myArray")).toBe(true);
-  expect(testInfixExpression(indexExp.index, 1, "+", 1));
+  expect(testInfixExpression(indexExp.index, 1, "+", 1)).toBe(true);
 });
 
 test("testParsingArrayLiterals", () => {
@@ -461,16 +459,16 @@ test("testParsingArrayLiterals", () => {
   checkParserErrors(p);
 
   const stmt = program?.statements[0] as ExpressionStatement;
-  expect(stmt instanceof ExpressionStatement).toBeTruthy();
+  expect(stmt instanceof ExpressionStatement).toBe(true);
 
   const array = stmt.expression as ArrayLiteral;
-  expect(array instanceof ArrayLiteral).toBeTruthy();
+  expect(array instanceof ArrayLiteral).toBe(true);
 
   expect(array.elements).toHaveLength(3);
 
-  expect(testIntegerLiteral(array.elements[0], 1));
-  expect(testInfixExpression(array.elements[1], 2, "*", 2));
-  expect(testInfixExpression(array.elements[1], 3, "+", 3));
+  expect(testIntegerLiteral(array.elements[0], 1)).toBe(true);
+  expect(testInfixExpression(array.elements[1], 2, "*", 2)).toBe(true);
+  expect(testInfixExpression(array.elements[2], 3, "+", 3)).toBe(true);
 });
 
 // test helper functions are below.
