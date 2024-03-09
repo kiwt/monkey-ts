@@ -21,6 +21,7 @@ let ten = 10;
    "foobar"
    "foo bar"
    [1, 2];
+   {"foo": "bar"}
     `;
   const expected: Token[] = [
     { Type: TokenKind.LET, Literal: "let" },
@@ -104,6 +105,11 @@ let ten = 10;
     { Type: TokenKind.INT, Literal: "2" },
     { Type: TokenKind.RBRACKET, Literal: "]" },
     { Type: TokenKind.SEMICOLON, Literal: ";" },
+    { Type: TokenKind.LBRACE, Literal: "{" },
+    { Type: TokenKind.STRING, Literal: "foo" },
+    { Type: TokenKind.COLON, Literal: ":" },
+    { Type: TokenKind.STRING, Literal: "bar" },
+    { Type: TokenKind.RBRACE, Literal: "}" },
     { Type: TokenKind.EOF, Literal: "" },
   ];
 

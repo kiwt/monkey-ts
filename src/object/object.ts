@@ -1,6 +1,5 @@
 import { BlockStatement, Identifier } from "../ast/ast";
 import { Environment } from "./environment";
-import { start } from "../repl/repl";
 
 export type ObjType = (typeof ObjType)[keyof typeof ObjType];
 
@@ -13,6 +12,7 @@ export const ObjType = {
   FUNCTION_OBJ: "FUNCTION",
   BUILTIN_OBJ: "BUILTIN",
   ARRAY_OBJ: "ARRAY",
+  HASH_OBJ: "HASH",
   ERROR_OBJ: "ERROR",
 } as const;
 
@@ -21,7 +21,11 @@ export interface Obj {
   inspect(): string;
 }
 
-export class IntegerObj implements Obj {
+export interface Hashable {
+  hashKey(): HashKey;
+}
+
+export class IntegerObj implements Obj, Hashable {
   constructor(public value: number) {}
   type(): ObjType {
     return ObjType.INTEGER_OBJ;
@@ -30,9 +34,13 @@ export class IntegerObj implements Obj {
   inspect(): string {
     return this.value.toString();
   }
+
+  hashKey(): HashKey {
+    return new HashKey(this.type(), this.value);
+  }
 }
 
-export class BooleanObj implements Obj {
+export class BooleanObj implements Obj, Hashable {
   constructor(public value: boolean) {}
 
   type(): ObjType {
@@ -42,9 +50,14 @@ export class BooleanObj implements Obj {
   inspect(): string {
     return String(this.value);
   }
+
+  hashKey(): HashKey {
+    const value = this.value ? 1 : 0;
+    return new HashKey(ObjType.BOOLEAN_OBJ, value);
+  }
 }
 
-export class StringObj implements Obj {
+export class StringObj implements Obj, Hashable {
   constructor(public value: string) {}
   type(): ObjType {
     return ObjType.STRING_OBJ;
@@ -52,6 +65,16 @@ export class StringObj implements Obj {
 
   inspect(): string {
     return this.value.toString();
+  }
+
+  hashKey(): HashKey {
+    let hash = 0;
+    for (let i = 0; i < this.value.length; i++) {
+      const char = this.value.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return new HashKey(this.type(), hash);
   }
 }
 
@@ -147,5 +170,35 @@ export class ErrorObj implements Obj {
   }
   inspect(): string {
     return "ERROR: " + this.message;
+  }
+}
+
+export class HashKey {
+  constructor(public key: ObjType, public value: number) {}
+}
+
+export class HashPair {
+  constructor(public key: Obj, public value: Obj) {}
+}
+
+export class HashObj implements Obj {
+  constructor(public pairs: Map<HashKey, HashPair>) {}
+
+  type(): ObjType {
+    return ObjType.HASH_OBJ;
+  }
+  inspect(): string {
+    let out = "";
+
+    let pairs: string[] = [];
+    for (const [pair, _] of this.pairs) {
+      pairs.push(`${pair.key}: ${pair.value}`);
+    }
+
+    out += "{";
+    out += pairs.join(", ");
+    out += "}";
+
+    return out;
   }
 }

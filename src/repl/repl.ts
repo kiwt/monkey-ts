@@ -1,6 +1,5 @@
 import * as readline from "readline";
 import { Lexer } from "../lexer/lexer";
-import { Token, TokenKind } from "../token/token";
 import { Parser } from "../parser/parser";
 import { evaluate } from "../evaluator/evaluator";
 import { Environment } from "../object/environment";

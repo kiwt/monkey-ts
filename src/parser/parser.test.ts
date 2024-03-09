@@ -15,9 +15,9 @@ import {
   StringLiteral,
   IndexExpression,
   ArrayLiteral,
+  HashLiteral,
 } from "../ast/ast";
 import { Lexer } from "../lexer/lexer";
-import { TokenKind } from "../token/token";
 import { Parser } from "./parser";
 
 test("testLetStatement", () => {
@@ -469,6 +469,52 @@ test("testParsingArrayLiterals", () => {
   expect(testIntegerLiteral(array.elements[0], 1)).toBe(true);
   expect(testInfixExpression(array.elements[1], 2, "*", 2)).toBe(true);
   expect(testInfixExpression(array.elements[2], 3, "+", 3)).toBe(true);
+});
+
+test("testParsingHashLiteralsWithExpressions", () => {
+  const input = '{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}';
+
+  const l = new Lexer(input);
+  const p = new Parser(l);
+
+  const program = p.parseProgram();
+  checkParserErrors(p);
+
+  const stmt = program?.statements[0] as ExpressionStatement;
+  expect(stmt instanceof ExpressionStatement).toBe(true);
+
+  const hash = stmt.expression as HashLiteral;
+  expect(hash instanceof HashLiteral).toBe(true);
+
+  expect(hash.pairs.size).toBe(3);
+
+  const tests = new Map<string, (e: Expression) => boolean>([
+    [
+      "one",
+      (e: Expression) => {
+        return testInfixExpression(e, 0, "+", 1);
+      },
+    ],
+    [
+      "two",
+      (e: Expression) => {
+        return testInfixExpression(e, 10, "-", 8);
+      },
+    ],
+    [
+      "three",
+      (e: Expression) => {
+        return testInfixExpression(e, 15, "/", 5);
+      },
+    ],
+  ]);
+
+  for (const [key, value] of hash.pairs) {
+    const literal = key as StringLiteral;
+    expect(literal instanceof StringLiteral).toBe(true);
+    const testFunc = tests.get(literal.string())!;
+    expect(testFunc(value)).toBe(true);
+  }
 });
 
 // test helper functions are below.

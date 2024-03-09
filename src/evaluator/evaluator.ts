@@ -19,6 +19,7 @@ import {
   StringLiteral,
   ArrayLiteral,
   IndexExpression,
+  HashLiteral,
 } from "../ast/ast";
 import {
   ArrayObj,
@@ -26,6 +27,9 @@ import {
   BuiltinObj,
   ErrorObj,
   FunctionObj,
+  HashObj,
+  HashKey,
+  HashPair,
   IntegerObj,
   NullObj,
   Obj,
@@ -152,6 +156,9 @@ export function evaluate(env: Environment, node?: Node): Obj | undefined {
 
       return evalIndexExpression(left, index);
     }
+
+    case NodeKind.HashLiteral:
+      return evalHashLiteral(env, node as HashLiteral);
   }
 
   return undefined;
@@ -378,6 +385,9 @@ function evalIndexExpression(left?: Obj, index?: Obj): Obj {
       index?.type() == ObjType.INTEGER_OBJ:
       return evalArrayIndexExpression(left, index);
 
+    case left?.type() === ObjType.HASH_OBJ:
+      return evalHashIndexExpression(left, index!);
+
     default:
       return newError(`index operator not supported: ${left?.type()}`);
   }
@@ -392,6 +402,52 @@ function evalArrayIndexExpression(array: Obj, index: Obj): Obj {
     return NULL;
   }
   return arrayObject.elements[idx];
+}
+
+function evalHashIndexExpression(hash: Obj, index: Obj): Obj {
+  const hashObject = hash as HashObj;
+  const key = index as IntegerObj | StringObj | BooleanObj;
+
+  if (!isHashable(key)) {
+    return newError(`unusable as hash key: ${index.type()}`);
+  }
+
+  const pair = hashObject.pairs.get(
+    [...hashObject.pairs.keys()].filter(
+      (k) => k.value === key.hashKey().value
+    )[0]
+  );
+  if (pair === undefined) {
+    return NULL;
+  }
+
+  return pair.value;
+}
+
+function evalHashLiteral(env: Environment, node: HashLiteral): Obj | undefined {
+  const pairs = new Map<HashKey, HashPair>();
+
+  for (const [keyNode, valueNode] of node.pairs) {
+    const key = evaluate(env, keyNode);
+    if (isError(key)) {
+      return key;
+    }
+
+    const hashKey = key as IntegerObj | StringObj | BooleanObj;
+    if (!isHashable(hashKey)) {
+      return newError(`unusable as hash key: ${key?.type()}`);
+    }
+
+    const value = evaluate(env, valueNode);
+    if (isError(value)) {
+      return value;
+    }
+
+    const hashed = hashKey.hashKey();
+    pairs.set(hashed, new HashPair(key!, value!));
+  }
+
+  return new HashObj(pairs);
 }
 
 function applyFunction(args: Obj[], fn?: Obj): Obj | undefined {
@@ -450,6 +506,19 @@ function isTruthy(obj: Obj): boolean {
     default:
       return true;
   }
+}
+
+function isHashable(obj: Obj): boolean {
+  if (obj instanceof IntegerObj) {
+    return true;
+  }
+  if (obj instanceof StringObj) {
+    return true;
+  }
+  if (obj instanceof BooleanObj) {
+    return true;
+  }
+  return false;
 }
 
 function isError(obj: Obj | undefined): boolean {

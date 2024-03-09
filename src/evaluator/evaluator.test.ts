@@ -1,17 +1,17 @@
 import { Environment } from "../object/environment";
 import { Lexer } from "../lexer/lexer";
 import {
-  ArrayObj,
   BooleanObj,
   ErrorObj,
   FunctionObj,
+  HashObj,
+  HashKey,
   IntegerObj,
-  NullObj,
   Obj,
   StringObj,
 } from "../object/object";
 import { Parser } from "../parser/parser";
-import { NULL, evaluate } from "./evaluator";
+import { FALSE, NULL, TRUE, evaluate } from "./evaluator";
 
 function testEval(input: string): Obj {
   const l = new Lexer(input);
@@ -307,6 +307,87 @@ test("testArrayIndexExpressions", () => {
   }
 });
 
+test("testHashLiterals", () => {
+  const input = `let two = "two";
+      {
+           "one": 10 - 9,
+           two: 1 + 1,
+           "thr" + "ee": 6 / 2,
+           4: 4,
+           true: 5,
+           false: 6
+      }`;
+
+  const evaluated = testEval(input);
+  const result = evaluated as HashObj;
+  if (!(evaluated instanceof HashObj)) {
+    console.error(`Eval didn't return Hash. got=${typeof evaluated}`);
+  }
+
+  const expected = new Map<HashKey, number>([
+    [new StringObj("one").hashKey(), 1],
+    [new StringObj("two").hashKey(), 2],
+    [new StringObj("three").hashKey(), 3],
+    [new IntegerObj(4).hashKey(), 4],
+    [TRUE.hashKey(), 5],
+    [FALSE.hashKey(), 6],
+  ]);
+
+  if (result.pairs.size !== expected.size) {
+    console.error(`Hash has wrong num of pairs. got=${result.pairs.size}`);
+  }
+
+  for (const [expectedKey, expectedValue] of expected) {
+    const pair = result.pairs.get(
+      [...result.pairs.keys()].filter((k) => k.value === expectedKey.value)[0]
+    );
+
+    if (!pair) {
+      console.error("no pair for given key in Pairs");
+    }
+    expect(testIntegerObj(pair!.value, expectedValue)).toBe(true);
+  }
+});
+
+test("testHashIndexExpression", () => {
+  const tests: { input: string; expected: any }[] = [
+    {
+      input: `{"foo": 5}["foo"]`,
+      expected: 5,
+    },
+    {
+      input: `let key = "foo"; {"foo": 5}[key]`,
+      expected: 5,
+    },
+    {
+      input: `{5: 5}[5]`,
+      expected: 5,
+    },
+    {
+      input: `{"foo": 5}["bar"]`,
+      expected: NULL,
+    },
+    {
+      input: `{}["foo"]`,
+      expected: NULL,
+    },
+    {
+      input: `{false: 5}[false]`,
+      expected: 5,
+    },
+  ];
+
+  for (const tt of tests) {
+    const evaluated = testEval(tt.input);
+    const integer = typeof tt.expected === "number";
+    if (integer) {
+      expect(testIntegerObj(evaluated, tt.expected as number)).toBe(true);
+    } else {
+      expect(testNullObj(evaluated)).toBe(true);
+    }
+  }
+});
+
 test("testErrorHandling", () => {
   const tests: { input: string; expected: string }[] = [
     {
@@ -336,6 +417,10 @@ test("testErrorHandling", () => {
     {
       input: `"Hello" - "World"`,
       expected: "unknown operator: STRING - STRING",
+    },
+    {
+      input: `{"name": "Monkey"}[fn(x) { x }];`,
+      expected: "unusable as hash key: FUNCTION",
     },
   ];
 

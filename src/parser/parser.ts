@@ -6,6 +6,7 @@ import {
   Expression,
   ExpressionStatement,
   FunctionLiteral,
+  HashLiteral,
   Identifier,
   IfExpression,
   IndexExpression,
@@ -75,6 +76,7 @@ export class Parser {
       [TokenKind.TRUE, this.parseBoolean],
       [TokenKind.FALSE, this.parseBoolean],
       [TokenKind.LBRACKET, this.parseArrayLiteral],
+      [TokenKind.LBRACE, this.parseHashLiteral],
     ]);
     this.infixParseFns = new Map<TokenType, InfixParseFn>([
       [TokenKind.PLUS, this.parseInfixExpression],
@@ -294,6 +296,44 @@ export class Parser {
     }
 
     return array;
+  };
+
+  private parseHashLiteral = (): Expression | undefined => {
+    const hash = new HashLiteral(
+      this.curToken,
+      new Map<Expression, Expression>()
+    );
+
+    while (!this.peekTokenIs(TokenKind.RBRACE)) {
+      this.nextToken();
+      const key = this.parseExpression(Precedence.LOWEST);
+
+      if (!this.expectPeek(TokenKind.COLON)) {
+        return undefined;
+      }
+
+      this.nextToken();
+      const value = this.parseExpression(Precedence.LOWEST);
+
+      if (key === undefined || value === undefined) {
+        return undefined;
+      }
+
+      hash.pairs.set(key, value);
+
+      if (
+        !this.peekTokenIs(TokenKind.RBRACE) &&
+        !this.expectPeek(TokenKind.COMMA)
+      ) {
+        return undefined;
+      }
+    }
+
+    if (!this.expectPeek(TokenKind.RBRACE)) {
+      return undefined;
+    }
+
+    return hash;
   };
 
   private parsePrefixExpression = (): Expression | undefined => {

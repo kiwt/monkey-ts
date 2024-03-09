@@ -70,6 +70,9 @@ export class Lexer {
       case ";":
         tok = newToken(TokenKind.SEMICOLON, this.ch);
         break;
+      case ":":
+        tok = newToken(TokenKind.COLON, this.ch);
+        break;
       case "(":
         tok = newToken(TokenKind.LPAREN, this.ch);
         break;

@@ -19,6 +19,7 @@ export const NodeKind = {
   StringLiteral: 14,
   ArrayLiteral: 15,
   IndexExpression: 16,
+  HashLiteral: 17,
 } as const;
 
 export interface Node {
@@ -456,5 +457,34 @@ export class IndexExpression implements Expression {
 
   kind(): NodeType {
     return NodeKind.IndexExpression;
+  }
+}
+
+export class HashLiteral implements Expression {
+  constructor(public token: Token, public pairs: Map<Expression, Expression>) {}
+
+  expressionNode(): void {}
+
+  tokenLiteral(): string {
+    return this.token.Literal;
+  }
+
+  string(): string {
+    let out = "";
+
+    let pairs: string[] = [];
+    for (const [key, value] of this.pairs) {
+      pairs.push(key.string() + ":" + value.string());
+    }
+
+    out += "{";
+    out += pairs.join(", ");
+    out += "}";
+
+    return out;
+  }
+
+  kind(): NodeType {
+    return NodeKind.HashLiteral;
   }
 }

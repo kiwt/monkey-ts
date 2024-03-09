@@ -33,6 +33,7 @@ export const TokenKind = {
   // Delimiters
   COMMA: ",",
   SEMICOLON: ";",
+  COLON: ":",
 
   LPAREN: "(",
   RPAREN: ")",
