@@ -129,4 +129,14 @@ export const builtins = new Map<string, BuiltinObj>([
       return NULL;
     }),
   ],
+  [
+    "puts",
+    new BuiltinObj(function (...args: Obj[]): Obj {
+      for (const arg of args) {
+        console.log(arg.inspect());
+      }
+
+      return NULL;
+    }),
+  ],
 ]);
